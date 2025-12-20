@@ -2,9 +2,9 @@
 
 ## Phase 1: Test Infrastructure Setup
 
-- [ ] Task: Configure Vitest as the testing framework with TypeScript support
-- [ ] Task: Add coverage reporting configuration (istanbul/c8)
-- [ ] Task: Update package.json with test scripts
+- [x] Task: Configure Vitest as the testing framework with TypeScript support (cb450c4)
+- [x] Task: Add coverage reporting configuration (istanbul/c8) (cb450c4)
+- [x] Task: Update package.json with test scripts (cb450c4)
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Test Infrastructure Setup' (Protocol in workflow.md)
 
 ## Phase 2: Core Script Tests
