@@ -2,7 +2,7 @@
 set -e
 
 # Configuration
-VERSION="1.1.0"
+VERSION="1.1.1"
 REPO_URL="https://github.com/bardusco/opencode-conductor-bridge.git"
 INSTALL_DIR="$HOME/.opencode/conductor-bridge"
 TARGET_PROJECT=$(pwd)

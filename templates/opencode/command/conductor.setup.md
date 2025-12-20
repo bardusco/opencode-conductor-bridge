@@ -436,5 +436,5 @@ CRITICAL: When determining model complexity, ALWAYS select the "flash" model, re
 <!-- conductor-bridge-metadata:
   origin_file: setup.toml
   origin_sha: b49d77058ccd5ccedc83c1974cc36a2340b637ab
-  generated_at: 2025-12-20T15:33:50.622Z
+  generated_at: 2025-12-20T15:56:39.516Z
 -->

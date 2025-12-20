@@ -67,39 +67,46 @@ ${prompt}
     console.log(`  ✓ Generated conductor.${commandName}.md`);
   }
 
-  // Sync Styleguides
+  // Sync Styleguides (Aggregated into a single command)
   if (fs.existsSync(TEMPLATES_SOURCE)) {
     const styleguideFiles = fs.readdirSync(TEMPLATES_SOURCE).filter(f => f.endsWith('.md'));
-    console.log(`Syncing styleguides...`);
+    const languages = styleguideFiles.map(f => path.basename(f, '.md')).sort();
     
-    for (const file of styleguideFiles) {
-      const filePath = path.join(TEMPLATES_SOURCE, file);
-      const content = fs.readFileSync(filePath, 'utf-8');
-      const styleguideName = path.basename(file, '.md');
-
-      const mdContent = `---
-description: Conductor Styleguide for ${styleguideName}
+    console.log(`Syncing styleguides (aggregated)...`);
+    
+    const mdContent = `---
+description: Access language-specific code styleguides bridged from Conductor
 ---
 
-# Conductor Styleguide: ${styleguideName}
+# Conductor Styleguide
+
+This command provides access to the official code styleguides from Gemini Conductor.
+
+### Available Styleguides
+${languages.map(lang => `- ${lang}`).join('\n')}
+
+### Instructions
+1. **Identify Language:** Determine which language the user is interested in (e.g., from the command arguments or context).
+2. **Fetch Rules:** Read the specific styleguide rules from the following path:
+   - \`{{CONDUCTOR_ROOT}}/templates/code_styleguides/<language>.md\`
+3. **Apply:** Use these rules for all code generation, refactoring, or review tasks.
+4. **No Language?** If the user didn't specify a language, list the available options above and ask which one they need.
 
 > [!NOTE]
-> This styleguide is bridged from Gemini Conductor.
-> **Conductor Source:** [${file}](https://github.com/gemini-cli-extensions/conductor/blob/${sha}/templates/code_styleguides/${file})
-
-${content}
+> These guides are bridged from Gemini Conductor.
+> **Source Directory:** [templates/code_styleguides](https://github.com/gemini-cli-extensions/conductor/tree/${sha}/templates/code_styleguides)
 
 <!-- conductor-bridge-metadata:
-  origin_file: ${file}
+  origin: templates/code_styleguides
   origin_sha: ${sha}
+  available_languages: ${languages.join(', ')}
   generated_at: ${new Date().toISOString()}
 -->
 `;
 
-      const outPath = path.join(OUTPUT_DIR, `conductor.styleguide.${styleguideName}.md`);
-      fs.writeFileSync(outPath, mdContent);
-      console.log(`  ✓ Generated conductor.styleguide.${styleguideName}.md`);
-    }
+    const outPath = path.join(OUTPUT_DIR, `conductor.styleguide.md`);
+    fs.writeFileSync(outPath, mdContent);
+    console.log(`  ✓ Generated conductor.styleguide.md`);
   }
 }
 
