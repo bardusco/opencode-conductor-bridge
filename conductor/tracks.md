@@ -4,5 +4,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [x] Track: Release/Tag Signing with Sigstore
-*Link: [./conductor/tracks/release_signing_sigstore_20251220/](./conductor/tracks/release_signing_sigstore_20251220/)*
+<!-- No active tracks. Use /conductor:newTrack to create a new track. -->
