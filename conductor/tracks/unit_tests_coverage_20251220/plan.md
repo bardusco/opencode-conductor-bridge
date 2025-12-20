@@ -9,8 +9,8 @@
 
 ## Phase 2: Core Script Tests
 
-- [ ] Task: Write tests for `scripts/sync-commands.ts`
-- [ ] Task: Write tests for `scripts/setup-bridge.ts`
+- [x] Task: Write tests for `scripts/sync-commands.ts` (c30b2b0)
+- [~] Task: Write tests for `scripts/setup-bridge.ts`
 - [ ] Task: Write tests for `scripts/uninstall-bridge.ts`
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Core Script Tests' (Protocol in workflow.md)
 
