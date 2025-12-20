@@ -72,9 +72,29 @@ Once installed, you can use the following commands in OpenCode:
 - `/conductor.implement`: Execute the current track's plan.
 - `/conductor.status`: Check the progress of your tracks.
 - `/conductor.revert`: Revert a track or task.
-- `/conductor.styleguide`: Access language-specific code styleguides (Go, TS, Python, etc.).
+- `/conductor.styleguide`: Access language-specific code styleguides (Go, TS, Python, etc.). **[Bridge Enhanced]**
 - `/conductor.bridge-update`: Update the bridge and its commands to the latest version.
 - `/conductor.uninstall`: Remove bridge commands from the current project.
+
+### Styleguide Command (Bridge Enhanced)
+
+The `/conductor.styleguide` command is an enhancement exclusive to this bridge. In the original Conductor, styleguides are passive artifacts that the agent reads on-demand. Here, they've been transformed into an **interactive command** that allows you to:
+
+- **Consult** any styleguide directly: `/conductor.styleguide python`
+- **Apply** rules to a specific file: `/conductor.styleguide typescript` then point to your file
+- **List** available languages when called without arguments
+
+**Available styleguides:** `general`, `go`, `html-css`, `javascript`, `python`, `typescript`
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Original Conductor          │  OpenCode Bridge             │
+├─────────────────────────────────────────────────────────────┤
+│  Styleguides are read        │  /conductor.styleguide is    │
+│  implicitly by the agent     │  an interactive command      │
+│  during code generation      │  you can invoke directly     │
+└─────────────────────────────────────────────────────────────┘
+```
 
 ## How It Works
 
