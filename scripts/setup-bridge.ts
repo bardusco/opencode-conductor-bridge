@@ -6,13 +6,13 @@ const VENDOR_CONDUCTOR = path.join(BRIDGE_ROOT, 'vendor/conductor');
 
 async function setup() {
   const targetProject = process.argv[2] || process.cwd();
-  const targetOpencodeDir = path.join(targetProject, '.opencode/commands');
+  const targetOpencodeDir = path.join(targetProject, '.opencode/command');
 
   if (!fs.existsSync(targetOpencodeDir)) {
     fs.mkdirSync(targetOpencodeDir, { recursive: true });
   }
 
-  const commandsDir = path.join(BRIDGE_ROOT, '.opencode/commands');
+  const commandsDir = path.join(BRIDGE_ROOT, '.opencode/command');
   const files = fs.readdirSync(commandsDir).filter(f => f.endsWith('.md'));
 
   for (const file of files) {

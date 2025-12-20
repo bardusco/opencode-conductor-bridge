@@ -4,7 +4,7 @@ import * as toml from 'toml';
 
 const CONDUCTOR_SOURCE = path.join(process.cwd(), 'vendor/conductor');
 const COMMANDS_SOURCE = path.join(CONDUCTOR_SOURCE, 'commands/conductor');
-const OUTPUT_DIR = path.join(process.cwd(), '.opencode/commands');
+const OUTPUT_DIR = path.join(process.cwd(), '.opencode/command');
 
 async function sync() {
   if (!fs.existsSync(OUTPUT_DIR)) {

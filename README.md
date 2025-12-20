@@ -17,7 +17,7 @@ curl -sSL https://raw.githubusercontent.com/bardusco/opencode-conductor-bridge/m
 ### What this does:
 1. Clones/Updates the bridge repository to `~/.opencode/conductor-bridge`.
 2. Syncs the latest Conductor templates and commands.
-3. Links the `/conductor.*` commands to your current project's `.opencode/commands` directory.
+3. Links the `/conductor.*` commands to your current project's `.opencode/command` directory.
 
 ## Available Commands
 
