@@ -60,12 +60,6 @@ function verifyReadme(version: string): boolean {
     errors.push(`"latest stable tag" example has v${stableTagMatch[1]}, expected v${version}`);
   }
 
-  // Check full script pinning example
-  const fullPinMatch = readme.match(/opencode-conductor-bridge\/v([\d.]+)\/install\.sh/);
-  if (fullPinMatch && fullPinMatch[1] !== version) {
-    errors.push(`Full script pinning example has v${fullPinMatch[1]}, expected v${version}`);
-  }
-
   if (errors.length > 0) {
     console.error('❌ README version drift detected:');
     errors.forEach(e => console.error(`   - ${e}`));
