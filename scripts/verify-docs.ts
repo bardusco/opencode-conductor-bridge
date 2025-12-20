@@ -39,13 +39,7 @@ export function verifyReadme(readmePath: string, version: string): ReadmeVerifyR
   const readme = fs.readFileSync(readmePath, 'utf-8');
   const errors: string[] = [];
 
-  // Check title version
-  const titleMatch = readme.match(/^# OpenCode Conductor Bridge \(v([\d.]+)\)/m);
-  if (!titleMatch) {
-    errors.push('README title missing version');
-  } else if (titleMatch[1] !== version) {
-    errors.push(`README title has v${titleMatch[1]}, expected v${version}`);
-  }
+  // Note: Title no longer contains version - version badge handles this dynamically
 
   // Check BRIDGE_REF examples (should reference current version)
   const bridgeRefPattern = /BRIDGE_REF[=:]"?v([\d.]+)"?/g;

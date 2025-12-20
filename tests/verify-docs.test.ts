@@ -56,7 +56,8 @@ describe('verify-docs', () => {
   });
 
   describe('verifyReadme', () => {
-    const validReadme = `# OpenCode Conductor Bridge (v1.2.3)
+    // Note: Title no longer requires version - version badge handles this dynamically
+    const validReadme = `# OpenCode Conductor Bridge
 
 Some content here.
 
@@ -78,26 +79,18 @@ latest stable tag (e.g., \`v1.2.3\`)
       expect(result.errors).toHaveLength(0);
     });
 
-    it('should detect missing title version', () => {
-      vi.mocked(fs.readFileSync).mockReturnValue('# Some Other Title');
+    it('should accept README without version in title', () => {
+      const readme = `# OpenCode Conductor Bridge
+| **v1.2.3** |`;
+      vi.mocked(fs.readFileSync).mockReturnValue(readme);
 
       const result = verifyReadme(path.join('test', 'README.md'), '1.2.3');
 
-      expect(result.valid).toBe(false);
-      expect(result.errors).toContain('README title missing version');
-    });
-
-    it('should detect wrong title version', () => {
-      vi.mocked(fs.readFileSync).mockReturnValue('# OpenCode Conductor Bridge (v1.0.0)');
-
-      const result = verifyReadme(path.join('test', 'README.md'), '1.2.3');
-
-      expect(result.valid).toBe(false);
-      expect(result.errors.some(e => e.includes('README title has v1.0.0'))).toBe(true);
+      expect(result.valid).toBe(true);
     });
 
     it('should detect wrong BRIDGE_REF version', () => {
-      const readme = `# OpenCode Conductor Bridge (v1.2.3)
+      const readme = `# OpenCode Conductor Bridge
 BRIDGE_REF="v1.0.0"
 | **v1.2.3** |`;
       vi.mocked(fs.readFileSync).mockReturnValue(readme);
@@ -109,7 +102,7 @@ BRIDGE_REF="v1.0.0"
     });
 
     it('should detect wrong git checkout version', () => {
-      const readme = `# OpenCode Conductor Bridge (v1.2.3)
+      const readme = `# OpenCode Conductor Bridge
 git checkout v1.0.0
 | **v1.2.3** |`;
       vi.mocked(fs.readFileSync).mockReturnValue(readme);
@@ -121,7 +114,7 @@ git checkout v1.0.0
     });
 
     it('should detect missing compatibility matrix', () => {
-      vi.mocked(fs.readFileSync).mockReturnValue('# OpenCode Conductor Bridge (v1.2.3)\nNo matrix here');
+      vi.mocked(fs.readFileSync).mockReturnValue('# OpenCode Conductor Bridge\nNo matrix here');
 
       const result = verifyReadme(path.join('test', 'README.md'), '1.2.3');
 
@@ -130,7 +123,7 @@ git checkout v1.0.0
     });
 
     it('should detect wrong matrix version', () => {
-      const readme = `# OpenCode Conductor Bridge (v1.2.3)
+      const readme = `# OpenCode Conductor Bridge
 | **v1.0.0** |`;
       vi.mocked(fs.readFileSync).mockReturnValue(readme);
 
@@ -141,7 +134,7 @@ git checkout v1.0.0
     });
 
     it('should detect wrong stable tag example', () => {
-      const readme = `# OpenCode Conductor Bridge (v1.2.3)
+      const readme = `# OpenCode Conductor Bridge
 | **v1.2.3** |
 latest stable tag (e.g., \`v1.0.0\`)`;
       vi.mocked(fs.readFileSync).mockReturnValue(readme);
@@ -216,7 +209,7 @@ latest stable tag (e.g., \`v1.0.0\`)`;
       templatesDir: path.join(testBase, 'templates', 'opencode', 'command'),
     };
 
-    const validReadme = `# OpenCode Conductor Bridge (v1.2.3)
+    const validReadme = `# OpenCode Conductor Bridge
 | **v1.2.3** |`;
 
     beforeEach(() => {
