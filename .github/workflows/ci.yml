@@ -81,6 +81,9 @@ jobs:
       - name: Verify Compatibility Matrix
         run: npm run verify:compat
 
+      - name: Verify Documentation Consistency
+        run: npm run verify:docs
+
   smoke-install:
     runs-on: ubuntu-latest
     needs: test

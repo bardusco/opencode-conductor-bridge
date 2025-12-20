@@ -24,7 +24,7 @@ This command provides access to the official code styleguides from Gemini Conduc
 
 > [!NOTE]
 > These guides are bridged from Gemini Conductor.
-> **Bridge Version:** 1.1.11
+> **Bridge Version:** 1.1.12
 > **Source Directory:** [templates/code_styleguides](https://github.com/gemini-cli-extensions/conductor/tree/b49d77058ccd5ccedc83c1974cc36a2340b637ab/templates/code_styleguides)
 
 <!-- conductor-bridge-metadata:

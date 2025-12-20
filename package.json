@@ -1,6 +1,6 @@
 {
   "name": "opencode-conductor-bridge",
-  "version": "1.1.11",
+  "version": "1.1.12",
   "main": "index.js",
   "bin": {
     "opencode-conductor-bridge": "bin/install.js"
@@ -10,9 +10,10 @@
     "sync": "npx tsx scripts/sync-commands.ts",
     "lint": "tsc --noEmit",
     "verify:compat": "npx tsx scripts/verify-compat.ts",
+    "verify:docs": "npx tsx scripts/verify-docs.ts",
     "maintenance": "git merge --abort || true && git reset --hard origin/main && git clean -fd && git submodule update --init --recursive && npm run sync && npx tsx scripts/setup-bridge.ts .",
     "uninstall": "npx tsx scripts/uninstall-bridge.ts",
-    "test": "npm run lint && npm run sync && npm run verify:compat"
+    "test": "npm run lint && npm run sync && npm run verify:compat && npm run verify:docs"
   },
   "keywords": [],
   "author": "Danilo Bardusco <danilo@bardusco.com>",
