@@ -2,52 +2,115 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { execSync } from 'child_process';
 
-const README_PATH = path.join(process.cwd(), 'README.md');
-const PACKAGE_PATH = path.join(process.cwd(), 'package.json');
-const CONDUCTOR_PATH = path.join(process.cwd(), 'vendor/conductor');
+export interface VerifyCompatConfig {
+  readmePath: string;
+  packagePath: string;
+  conductorPath: string;
+}
 
-async function verify() {
-  console.log('🔍 Verifying Compatibility Matrix...');
+export function createDefaultConfig(cwd: string = process.cwd()): VerifyCompatConfig {
+  return {
+    readmePath: path.join(cwd, 'README.md'),
+    packagePath: path.join(cwd, 'package.json'),
+    conductorPath: path.join(cwd, 'vendor/conductor'),
+  };
+}
 
-  // 1. Get current bridge version
-  const pkg = JSON.parse(fs.readFileSync(PACKAGE_PATH, 'utf-8'));
-  const version = pkg.version;
+export function getPackageVersion(packagePath: string): string {
+  const pkg = JSON.parse(fs.readFileSync(packagePath, 'utf-8'));
+  return pkg.version;
+}
 
-  // 2. Get current Conductor SHA
-  let currentSha = '';
-  try {
-    currentSha = execSync('git rev-parse HEAD', { cwd: CONDUCTOR_PATH }).toString().trim().substring(0, 7);
-  } catch (e) {
-    console.error('❌ Error: Could not determine Conductor submodule SHA.');
-    process.exit(1);
-  }
+export function getConductorSha(conductorPath: string): string {
+  return execSync('git rev-parse HEAD', { cwd: conductorPath }).toString().trim().substring(0, 7);
+}
 
-  // 3. Check README
-  const readme = fs.readFileSync(README_PATH, 'utf-8');
-  
+export function extractDocumentedSha(readme: string, version: string): string | null {
   // Look for the version in the matrix and its associated SHA
   // Example line: | **v1.1.2** | [b49d770](...) | ... |
   const versionRegex = new RegExp(`\\|\\s+\\*\\*v${version.replace(/\./g, '\\.')}\\*\\*\\s+\\|\\s+\\[([a-f0-9]+)\\]`, 'i');
   const match = readme.match(versionRegex);
-
+  
   if (!match) {
-    console.error(`❌ Error: Bridge version v${version} not found in README's Compatibility Matrix.`);
-    console.log(`Please add a line for v${version} in the README matrix.`);
-    process.exit(1);
+    return null;
   }
-
-  const documentedSha = match[1].substring(0, 7);
-
-  if (documentedSha !== currentSha) {
-    console.error(`❌ Error: Compatibility Matrix mismatch!`);
-    console.error(`   - Bridge version: v${version}`);
-    console.error(`   - Documented Conductor SHA: ${documentedSha}`);
-    console.error(`   - Actual Conductor SHA: ${currentSha}`);
-    console.log(`Please update the README to match the actual submodule SHA.`);
-    process.exit(1);
-  }
-
-  console.log(`✅ Success: v${version} is correctly documented with Conductor SHA ${currentSha}.`);
+  
+  return match[1].substring(0, 7);
 }
 
-verify().catch(console.error);
+export interface VerifyResult {
+  success: boolean;
+  version: string;
+  currentSha: string;
+  documentedSha: string | null;
+  error?: string;
+}
+
+export async function verify(config: VerifyCompatConfig): Promise<VerifyResult> {
+  console.log('Verifying Compatibility Matrix...');
+
+  // 1. Get current bridge version
+  const version = getPackageVersion(config.packagePath);
+
+  // 2. Get current Conductor SHA
+  let currentSha: string;
+  try {
+    currentSha = getConductorSha(config.conductorPath);
+  } catch (e) {
+    return {
+      success: false,
+      version,
+      currentSha: '',
+      documentedSha: null,
+      error: 'Could not determine Conductor submodule SHA.',
+    };
+  }
+
+  // 3. Check README
+  const readme = fs.readFileSync(config.readmePath, 'utf-8');
+  const documentedSha = extractDocumentedSha(readme, version);
+
+  if (!documentedSha) {
+    return {
+      success: false,
+      version,
+      currentSha,
+      documentedSha: null,
+      error: `Bridge version v${version} not found in README's Compatibility Matrix.`,
+    };
+  }
+
+  if (documentedSha !== currentSha) {
+    return {
+      success: false,
+      version,
+      currentSha,
+      documentedSha,
+      error: `Compatibility Matrix mismatch! Documented: ${documentedSha}, Actual: ${currentSha}`,
+    };
+  }
+
+  console.log(`Success: v${version} is correctly documented with Conductor SHA ${currentSha}.`);
+  
+  return {
+    success: true,
+    version,
+    currentSha,
+    documentedSha,
+  };
+}
+
+// Main execution - only runs when script is executed directly
+const isMainModule = import.meta.url === `file://${process.argv[1]}`;
+if (isMainModule) {
+  const config = createDefaultConfig();
+  verify(config).then((result) => {
+    if (!result.success) {
+      console.error(`Error: ${result.error}`);
+      process.exit(1);
+    }
+  }).catch((error) => {
+    console.error(`ERROR: ${error.message}`);
+    process.exit(1);
+  });
+}
