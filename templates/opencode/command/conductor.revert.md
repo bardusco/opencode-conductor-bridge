@@ -1,12 +1,12 @@
 ---
-description: Reverts previous work
+description: "Reverts previous work"
 ---
 
 # Conductor Bridge: revert
 
 > [!NOTE]
 > This command is bridged from Gemini Conductor.
-> **Bridge Version:** 1.1.7
+> **Bridge Version:** 1.1.8
 > **Conductor Source:** [revert.toml](https://github.com/gemini-cli-extensions/conductor/blob/b49d77058ccd5ccedc83c1974cc36a2340b637ab/commands/conductor/revert.toml)
 > **Local Reference:** `{{CONDUCTOR_ROOT}}/commands/conductor/revert.toml`
 

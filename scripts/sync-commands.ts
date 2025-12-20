@@ -16,12 +16,26 @@ function getSubmoduleSha() {
   }
 }
 
+function getPackageVersion() {
+  try {
+    const pkg = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf-8'));
+    return pkg.version;
+  } catch (e) {
+    return '1.1.7';
+  }
+}
+
+function yamlEscape(str: string) {
+  return str.replace(/"/g, '\\"').replace(/\n/g, ' ');
+}
+
 async function sync() {
   if (!fs.existsSync(OUTPUT_DIR)) {
     fs.mkdirSync(OUTPUT_DIR, { recursive: true });
   }
 
   const sha = getSubmoduleSha();
+  const version = getPackageVersion();
   
   // Sync TOML Commands
   const commandFiles = fs.readdirSync(COMMANDS_SOURCE).filter(f => f.endsWith('.toml'));
@@ -42,14 +56,14 @@ async function sync() {
     prompt = prompt.split(conductorExtensionPath).join(placeholder);
 
     const mdContent = `---
-description: ${description}
+description: "${yamlEscape(description)}"
 ---
 
 # Conductor Bridge: ${commandName}
 
 > [!NOTE]
 > This command is bridged from Gemini Conductor.
-> **Bridge Version:** 1.1.7
+> **Bridge Version:** ${version}
 > **Conductor Source:** [${file}](https://github.com/gemini-cli-extensions/conductor/blob/${sha}/commands/conductor/${file})
 > **Local Reference:** \`{{CONDUCTOR_ROOT}}/commands/conductor/${file}\`
 
@@ -74,7 +88,7 @@ ${prompt}
     console.log(`Syncing styleguides (aggregated)...`);
     
     const mdContent = `---
-description: Access language-specific code styleguides bridged from Conductor
+description: "Access language-specific code styleguides bridged from Conductor"
 ---
 
 # Conductor Styleguide
@@ -94,6 +108,7 @@ ${languages.map(lang => `- ${lang}`).join('\n')}
 
 > [!NOTE]
 > These guides are bridged from Gemini Conductor.
+> **Bridge Version:** ${version}
 > **Source Directory:** [templates/code_styleguides](https://github.com/gemini-cli-extensions/conductor/tree/${sha}/templates/code_styleguides)
 
 <!-- conductor-bridge-metadata:

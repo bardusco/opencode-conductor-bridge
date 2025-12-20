@@ -1,12 +1,12 @@
 ---
-description: Plans a track, generates track-specific spec documents and updates the tracks file
+description: "Plans a track, generates track-specific spec documents and updates the tracks file"
 ---
 
 # Conductor Bridge: newTrack
 
 > [!NOTE]
 > This command is bridged from Gemini Conductor.
-> **Bridge Version:** 1.1.7
+> **Bridge Version:** 1.1.8
 > **Conductor Source:** [newTrack.toml](https://github.com/gemini-cli-extensions/conductor/blob/b49d77058ccd5ccedc83c1974cc36a2340b637ab/commands/conductor/newTrack.toml)
 > **Local Reference:** `{{CONDUCTOR_ROOT}}/commands/conductor/newTrack.toml`
 
