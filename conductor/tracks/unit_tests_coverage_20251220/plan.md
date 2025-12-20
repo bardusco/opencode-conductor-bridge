@@ -27,6 +27,6 @@
 
 ## Phase 5: CI Integration and Coverage Verification
 
-- [ ] Task: Update CI workflow to run tests with coverage
-- [ ] Task: Verify overall coverage meets 80% threshold
+- [x] Task: Update CI workflow to run tests with coverage (2b92d7d)
+- [~] Task: Verify overall coverage meets 80% threshold
 - [ ] Task: Conductor - User Manual Verification 'Phase 5: CI Integration and Coverage Verification' (Protocol in workflow.md)
