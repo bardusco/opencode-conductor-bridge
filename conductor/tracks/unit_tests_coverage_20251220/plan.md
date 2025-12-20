@@ -14,11 +14,11 @@
 - [x] Task: Write tests for `scripts/uninstall-bridge.ts` (b9bdb26)
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Core Script Tests' (Protocol in workflow.md) (f2436cc)
 
-## Phase 3: Verification Script Tests
+## Phase 3: Verification Script Tests [checkpoint: 17cf368]
 
 - [x] Task: Write tests for `scripts/verify-compat.ts` (5926107)
 - [x] Task: Write tests for `scripts/verify-docs.ts` (d76a580)
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Verification Script Tests' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Verification Script Tests' (Protocol in workflow.md) (17cf368)
 
 ## Phase 4: Installation Script Tests
 
