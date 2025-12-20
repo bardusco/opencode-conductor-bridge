@@ -2,16 +2,23 @@
 set -e
 
 # Configuration
-VERSION="1.1.1"
+VERSION="1.1.2"
 REPO_URL="https://github.com/bardusco/opencode-conductor-bridge.git"
 INSTALL_DIR="$HOME/.opencode/conductor-bridge"
 TARGET_PROJECT=$(pwd)
 
+# 0. Check for Git
+if ! command -v git &> /dev/null; then
+    echo "❌ Error: 'git' is not installed. This bridge requires git to function."
+    echo "Please install git and try again."
+    exit 1
+fi
+
 # Allow pinning to a specific version/tag/sha
-# If not provided, we will try to find the latest tag, or fallback to main
+# If not provided, we will try to find the latest stable tag, or fallback to main
 if [ -z "$BRIDGE_REF" ]; then
-    # Try to get latest tag, if fails or no tags, use main
-    LATEST_TAG=$(git ls-remote --tags --sort="v:refname" "$REPO_URL" | tail -n1 | sed 's/.*\///' | sed 's/\^{}//')
+    # Try to get latest stable tag (vX.Y.Z), if fails or no tags, use main
+    LATEST_TAG=$(git ls-remote --tags --sort="v:refname" "$REPO_URL" | grep -E 'refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$' | tail -n1 | sed 's/.*\///')
     BRIDGE_REF=${LATEST_TAG:-main}
 fi
 

@@ -58,7 +58,6 @@ ${prompt}
 <!-- conductor-bridge-metadata:
   origin_file: ${file}
   origin_sha: ${sha}
-  generated_at: ${new Date().toISOString()}
 -->
 `;
 
@@ -90,7 +89,8 @@ ${languages.map(lang => `- ${lang}`).join('\n')}
 2. **Fetch Rules:** Read the specific styleguide rules from the following path:
    - \`{{CONDUCTOR_ROOT}}/templates/code_styleguides/<language>.md\`
 3. **Apply:** Use these rules for all code generation, refactoring, or review tasks.
-4. **No Language?** If the user didn't specify a language, list the available options above and ask which one they need.
+4. **Apply Mode:** If the user specifically asks to *apply* a styleguide to the current file or context, summarize the most relevant rules from the file and explain how they apply to the current code.
+5. **No Language?** If the user didn't specify a language, list the available options above and ask which one they need.
 
 > [!NOTE]
 > These guides are bridged from Gemini Conductor.
@@ -100,7 +100,6 @@ ${languages.map(lang => `- ${lang}`).join('\n')}
   origin: templates/code_styleguides
   origin_sha: ${sha}
   available_languages: ${languages.join(', ')}
-  generated_at: ${new Date().toISOString()}
 -->
 `;
 

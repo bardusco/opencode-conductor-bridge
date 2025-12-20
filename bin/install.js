@@ -21,6 +21,15 @@ function run(cmd, cwd = process.cwd()) {
 async function install() {
   console.log('🚀 Installing OpenCode Conductor Bridge (Node.js Installer)...');
 
+  // 0. Check for Git
+  try {
+    execSync('git --version', { stdio: 'ignore' });
+  } catch (e) {
+    console.error('❌ Error: \'git\' command not found. This bridge requires git to function.');
+    console.error('Please install git (https://git-scm.com/) and try again.');
+    process.exit(1);
+  }
+
   // 1. Ensure base directory exists
   const opencodeBase = path.join(os.homedir(), '.opencode');
   if (!fs.existsSync(opencodeBase)) {
@@ -35,14 +44,17 @@ async function install() {
     run('git reset --hard HEAD', INSTALL_DIR);
     run('git clean -fd', INSTALL_DIR);
     
-    // Get latest tag or branch
+    // Get latest stable tag or branch
     let ref = process.env.BRIDGE_REF;
     if (!ref) {
         try {
-            const tags = execSync(`git ls-remote --tags --sort="v:refname" ${REPO_URL}`).toString().trim().split('\n');
-            if (tags.length > 0) {
-                const lastTag = tags[tags.length - 1].split('/').pop().replace('^{}', '');
-                ref = lastTag;
+            const output = execSync(`git ls-remote --tags --sort="v:refname" ${REPO_URL}`).toString().trim();
+            const stableTags = output.split('\n')
+                .filter(line => /refs\/tags\/v\d+\.\d+\.\d+$/.test(line))
+                .map(line => line.split('/').pop());
+            
+            if (stableTags.length > 0) {
+                ref = stableTags[stableTags.length - 1];
             }
         } catch (e) {
             ref = 'main';
