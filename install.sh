@@ -2,11 +2,12 @@
 set -e
 
 # Configuration
+VERSION="1.0.1"
 REPO_URL="https://github.com/bardusco/opencode-conductor-bridge.git"
 INSTALL_DIR="$HOME/.opencode/conductor-bridge"
 TARGET_PROJECT=$(pwd)
 
-echo "🚀 Installing OpenCode Conductor Bridge..."
+echo "🚀 Installing OpenCode Conductor Bridge (v$VERSION)..."
 
 # 1. Ensure the base directory exists
 mkdir -p "$HOME/.opencode"
@@ -15,7 +16,13 @@ mkdir -p "$HOME/.opencode"
 if [ -d "$INSTALL_DIR" ]; then
     echo "     - Updating existing bridge in $INSTALL_DIR..."
     cd "$INSTALL_DIR"
-    # Force reset to remote state to avoid pull conflicts with local generated files
+    # Ensure we are in a clean state before doing anything
+    git am --abort > /dev/null 2>&1 || true
+    git merge --abort > /dev/null 2>&1 || true
+    git reset --hard HEAD > /dev/null 2>&1 || true
+    git clean -fd > /dev/null 2>&1 || true
+    
+    # Force reset to remote state
     git fetch origin main
     git reset --hard origin/main
     git clean -fd
