@@ -45,4 +45,4 @@ Or via OpenCode:
 
 This bridge is distributed under the same license as Gemini Conductor (Apache-2.0). See [LICENSE](./LICENSE) and [NOTICE](./NOTICE) for details.
 
-*Atribuição: Baseado no projeto [Conductor](https://github.com/gemini-cli-extensions/conductor) da Google.*
+*Attribution: Based on the [Conductor](https://github.com/gemini-cli-extensions/conductor) project by Google.*

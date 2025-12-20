@@ -9,9 +9,9 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "author": "Danilo Bardusco <danilo@bardusco.com>",
+  "license": "Apache-2.0",
+  "description": "Bridge Gemini Conductor's Context-Driven Development protocol to OpenCode.",
   "devDependencies": {
     "@types/node": "^25.0.3",
     "toml": "^3.0.0",

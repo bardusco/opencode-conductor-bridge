@@ -1,38 +1,38 @@
 #!/bin/bash
 set -e
 
-# Configurações
+# Configuration
 REPO_URL="https://github.com/bardusco/opencode-conductor-bridge.git"
 INSTALL_DIR="$HOME/.opencode/conductor-bridge"
 TARGET_PROJECT=$(pwd)
 
-echo "🚀 Instalando OpenCode Conductor Bridge..."
+echo "🚀 Installing OpenCode Conductor Bridge..."
 
-# 1. Garantir que o diretório base existe
+# 1. Ensure the base directory exists
 mkdir -p "$HOME/.opencode"
 
-# 2. Clonar ou Atualizar a Bridge
+# 2. Clone or Update the Bridge
 if [ -d "$INSTALL_DIR" ]; then
-    echo "     - Atualizando bridge existente em $INSTALL_DIR..."
+    echo "     - Updating existing bridge in $INSTALL_DIR..."
     cd "$INSTALL_DIR"
     git pull origin main
     git submodule update --init --recursive
 else
-    echo "     - Clonando bridge em $INSTALL_DIR..."
+    echo "     - Cloning bridge in $INSTALL_DIR..."
     git clone --recursive "$REPO_URL" "$INSTALL_DIR"
     cd "$INSTALL_DIR"
 fi
 
-# 3. Instalar dependências e Sincronizar
-echo "     - Instalando dependências..."
+# 3. Install dependencies and Sync
+echo "     - Installing dependencies..."
 npm install --quiet
-echo "     - Sincronizando comandos..."
+echo "     - Syncing commands..."
 npm run sync
 
-# 4. Vincular ao projeto atual
-echo "     - Vinculando comandos ao projeto em $TARGET_PROJECT..."
+# 4. Link to the current project
+echo "     - Linking commands to the project in $TARGET_PROJECT..."
 npx tsx scripts/setup-bridge.ts "$TARGET_PROJECT"
 
 echo ""
-echo "✅ Pronto! Os comandos /conductor.* já estão disponíveis neste projeto."
-echo "💡 Para atualizar no futuro, basta rodar este script novamente ou usar /conductor.bridge-update"
+echo "✅ Ready! The /conductor.* commands are now available in this project."
+echo "💡 To update in the future, simply run this script again or use /conductor.bridge-update"
