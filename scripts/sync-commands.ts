@@ -49,7 +49,7 @@ description: ${description}
 
 > [!NOTE]
 > This command is bridged from Gemini Conductor.
-> **Bridge Version:** 1.1.5
+> **Bridge Version:** 1.1.6
 > **Conductor Source:** [${file}](https://github.com/gemini-cli-extensions/conductor/blob/${sha}/commands/conductor/${file})
 > **Local Reference:** \`{{CONDUCTOR_ROOT}}/commands/conductor/${file}\`
 
