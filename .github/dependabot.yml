@@ -1,0 +1,35 @@
+# Dependabot Configuration
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+#
+# This configuration enables automated dependency updates for npm packages.
+# Dependabot will create pull requests for outdated dependencies on a daily basis.
+
+version: 2
+
+updates:
+  # npm package ecosystem configuration
+  - package-ecosystem: "npm"
+    
+    # Target the root directory where package.json is located
+    directory: "/"
+    
+    # Check for updates daily
+    schedule:
+      interval: "daily"
+      # Run at 9:00 AM UTC (reasonable time for review during business hours)
+      time: "09:00"
+      timezone: "Etc/UTC"
+    
+    # Limit the number of open PRs for version updates
+    # This prevents overwhelming the maintainers with too many PRs at once
+    open-pull-requests-limit: 10
+    
+    # Customize commit message format
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    
+    # Labels to add to PRs for easier filtering and automation
+    labels:
+      - "dependencies"
+      - "npm"
