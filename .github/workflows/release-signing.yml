@@ -1,0 +1,146 @@
+# Release Signing Workflow
+# https://docs.sigstore.dev/signing/quickstart/
+#
+# This workflow automatically signs Git tags and release assets using Sigstore (cosign)
+# with keyless signing via GitHub Actions OIDC. This provides cryptographic provenance
+# for releases without manual key management.
+#
+# Keyless signing uses GitHub's OIDC provider to attest the workflow's identity.
+# All signatures are recorded in Sigstore's public transparency log (Rekor).
+
+name: Release Signing
+
+on:
+  release:
+    types: [published]
+
+# Required permissions for keyless signing with OIDC
+permissions:
+  contents: write      # Required to upload release assets
+  id-token: write      # Required for OIDC token (keyless signing)
+
+jobs:
+  sign-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Checkout the repository to access the tag
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.release.tag_name }}
+      
+      # Install cosign for signing operations
+      # https://github.com/sigstore/cosign-installer
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3
+      
+      # Sign the Git tag using keyless OIDC identity
+      # This creates a signature blob that can be verified against the transparency log
+      - name: Sign Git Tag
+        run: |
+          echo "Signing tag: ${{ github.event.release.tag_name }}"
+          
+          # Create a blob from the tag reference for signing
+          TAG_BLOB="${{ github.event.release.tag_name }}.txt"
+          echo "${{ github.event.release.tag_name }}" > "$TAG_BLOB"
+          git log -1 --format="%H %s" >> "$TAG_BLOB"
+          
+          # Sign the tag blob using keyless signing (OIDC identity)
+          cosign sign-blob "$TAG_BLOB" \
+            --yes \
+            --output-signature "${{ github.event.release.tag_name }}.sig" \
+            --output-certificate "${{ github.event.release.tag_name }}.pem"
+          
+          echo "Tag signature created successfully"
+      
+      # Upload tag signature as release asset
+      - name: Upload Tag Signature
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${{ github.event.release.tag_name }}" \
+            "${{ github.event.release.tag_name }}.sig" \
+            "${{ github.event.release.tag_name }}.pem" \
+            "${{ github.event.release.tag_name }}.txt" \
+            --clobber
+          
+          echo "Tag signature uploaded to release"
+      
+      # Download all existing release assets for signing
+      - name: Download Release Assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p assets
+          cd assets
+          
+          # Get list of assets (excluding signature files we just uploaded)
+          ASSETS=$(gh release view "${{ github.event.release.tag_name }}" --json assets -q '.assets[].name' | grep -v '\.sig$' | grep -v '\.pem$' | grep -v '\.txt$' || true)
+          
+          if [ -z "$ASSETS" ]; then
+            echo "No assets to sign (excluding signature files)"
+            echo "HAS_ASSETS=false" >> $GITHUB_ENV
+          else
+            echo "Downloading assets for signing..."
+            for asset in $ASSETS; do
+              echo "  - $asset"
+              gh release download "${{ github.event.release.tag_name }}" --pattern "$asset" --dir .
+            done
+            echo "HAS_ASSETS=true" >> $GITHUB_ENV
+          fi
+      
+      # Sign each release asset and generate .sig files
+      - name: Sign Release Assets
+        if: env.HAS_ASSETS == 'true'
+        run: |
+          cd assets
+          
+          echo "Signing release assets..."
+          for file in *; do
+            # Skip if not a regular file
+            [ -f "$file" ] || continue
+            
+            echo "Signing: $file"
+            cosign sign-blob "$file" \
+              --yes \
+              --output-signature "${file}.sig" \
+              --output-certificate "${file}.pem"
+          done
+          
+          echo "All assets signed successfully"
+      
+      # Upload signature files to the GitHub Release
+      - name: Upload Asset Signatures
+        if: env.HAS_ASSETS == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd assets
+          
+          echo "Uploading signature files..."
+          for sig in *.sig *.pem; do
+            [ -f "$sig" ] || continue
+            echo "  - $sig"
+            gh release upload "${{ github.event.release.tag_name }}" "$sig" --clobber
+          done
+          
+          echo "All signatures uploaded to release"
+      
+      # Summary of signed artifacts
+      - name: Signing Summary
+        run: |
+          echo "## Release Signing Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Tag:** ${{ github.event.release.tag_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Signed Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "- Tag signature: \`${{ github.event.release.tag_name }}.sig\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Tag certificate: \`${{ github.event.release.tag_name }}.pem\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Verification" >> $GITHUB_STEP_SUMMARY
+          echo "To verify signatures, use:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "cosign verify-blob <file> --signature <file>.sig --certificate <file>.pem --certificate-oidc-issuer https://token.actions.githubusercontent.com --certificate-identity-regexp 'https://github.com/${{ github.repository }}/'" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
