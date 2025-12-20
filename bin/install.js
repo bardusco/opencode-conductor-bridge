@@ -37,52 +37,33 @@ async function install() {
   }
 
   // 2. Clone or Update
-  if (fs.existsSync(INSTALL_DIR)) {
-    console.log(`     - Updating existing bridge in ${INSTALL_DIR}...`);
-    run('git am --abort || true', INSTALL_DIR);
-    run('git merge --abort || true', INSTALL_DIR);
-    run('git reset --hard HEAD', INSTALL_DIR);
-    run('git clean -fd', INSTALL_DIR);
-    
-    // Get latest stable tag or branch
-    let ref = process.env.BRIDGE_REF;
-    if (!ref) {
-        try {
-            const output = execSync(`git ls-remote --tags --sort="v:refname" ${REPO_URL}`).toString().trim();
-            const stableTags = output.split('\n')
-                .filter(line => /refs\/tags\/v\d+\.\d+\.\d+$/.test(line))
-                .map(line => line.split('/').pop());
-            
-            if (stableTags.length > 0) {
-                ref = stableTags[stableTags.length - 1];
-            }
-        } catch (e) {
-            ref = 'main';
-        }
-    }
-    ref = ref || 'main';
-
-    console.log(`     - Using ref: ${ref}`);
-    run(`git fetch origin ${ref}`, INSTALL_DIR);
-    run(`git checkout ${ref}`, INSTALL_DIR);
-    run(`git reset --hard origin/${ref} || git reset --hard ${ref}`, INSTALL_DIR);
-    run('git clean -fd', INSTALL_DIR);
-    run('git submodule update --init --recursive', INSTALL_DIR);
-  } else {
+  if (!fs.existsSync(INSTALL_DIR)) {
     console.log(`     - Cloning bridge into ${INSTALL_DIR}...`);
     run(`git clone --recursive ${REPO_URL} "${INSTALL_DIR}"`);
   }
 
-  // 3. Install dependencies and Sync
-  console.log('     - Installing dependencies...');
-  run('npm install --quiet', INSTALL_DIR);
-  
-  console.log('     - Syncing commands...');
-  run('npm run sync', INSTALL_DIR);
+  // Get desired ref
+  let ref = process.env.BRIDGE_REF;
+  if (!ref) {
+    try {
+      const output = execSync(`git ls-remote --tags --sort="v:refname" ${REPO_URL}`).toString().trim();
+      const stableTags = output.split('\n')
+        .filter(line => /refs\/tags\/v\d+\.\d+\.\d+$/.test(line))
+        .map(line => line.split('/').pop());
+      
+      if (stableTags.length > 0) {
+        ref = stableTags[stableTags.length - 1];
+      }
+    } catch (e) {
+      ref = 'main';
+    }
+  }
+  ref = ref || 'main';
 
-  // 4. Link to project
-  console.log(`     - Linking commands to ${TARGET_PROJECT}...`);
-  run(`npx tsx scripts/setup-bridge.ts "${TARGET_PROJECT}"`, INSTALL_DIR);
+  // 3. Hand over to install-core.ts
+  // We use npx tsx to run the core script from the installation directory
+  process.env.BRIDGE_REF = ref;
+  run(`npx tsx scripts/install-core.ts "${TARGET_PROJECT}"`, INSTALL_DIR);
 
   console.log('\n✅ Ready! The /conductor.* commands are now available.');
 }

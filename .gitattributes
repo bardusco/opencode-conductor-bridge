@@ -1,0 +1,10 @@
+# Enforce LF line endings for all text files
+* text=auto eol=lf
+
+# Explicitly set for specific file types
+*.md text eol=lf
+*.ts text eol=lf
+*.js text eol=lf
+*.sh text eol=lf
+*.toml text eol=lf
+*.json text eol=lf
