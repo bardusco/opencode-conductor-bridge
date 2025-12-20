@@ -6,9 +6,9 @@ on:
     tags: [ "v*.*.*" ]
   pull_request:
 
-# Avoid duplicate runs for the same commit (e.g. branch push + tag push)
+# Avoid duplicate runs: use ref (not sha) so branch and tag runs don't cancel each other
 concurrency:
-  group: ${{ github.workflow }}-${{ github.sha }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
