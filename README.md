@@ -33,6 +33,22 @@ Pin a specific version with `BRIDGE_REF`:
 BRIDGE_REF=v1.2.0 npx github:bardusco/opencode-conductor-bridge
 ```
 
+## Getting Started
+
+> **After installing, run `/conductor.setup` in OpenCode to initialize the workflow in your project.**
+
+Here's the typical flow:
+
+```
+/conductor.setup      → Initialize Conductor in your project
+        ↓
+/conductor.newTrack   → Create a track for your feature or bug fix
+        ↓
+/conductor.implement  → Execute tasks from the track's plan
+        ↓
+/conductor.status     → Check progress at any time
+```
+
 ## Permissions & Configuration
 
 The bridge installs templates in `~/.opencode/conductor-bridge` and links them to your projects. Since OpenCode accesses files outside your project directory, you might need to adjust your permissions.
