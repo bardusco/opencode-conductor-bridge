@@ -18,6 +18,15 @@ function run(cmd, cwd = process.cwd()) {
   }
 }
 
+function runSilent(cmd, cwd = process.cwd()) {
+  try {
+    execSync(cmd, { cwd, stdio: 'pipe' });
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 async function install() {
   console.log('🚀 Installing OpenCode Conductor Bridge (Node.js Installer)...');
 
@@ -36,13 +45,13 @@ async function install() {
     fs.mkdirSync(opencodeBase, { recursive: true });
   }
 
-  // 2. Clone or Update
+  // 2. Clone if not exists
   if (!fs.existsSync(INSTALL_DIR)) {
     console.log(`     - Cloning bridge into ${INSTALL_DIR}...`);
     run(`git clone --recursive ${REPO_URL} "${INSTALL_DIR}"`);
   }
 
-  // Get desired ref
+  // 3. Get desired ref (latest stable tag or BRIDGE_REF)
   let ref = process.env.BRIDGE_REF;
   if (!ref) {
     try {
@@ -60,10 +69,35 @@ async function install() {
   }
   ref = ref || 'main';
 
-  // 3. Hand over to install-core.ts
-  // We use npx tsx to run the core script from the installation directory
-  process.env.BRIDGE_REF = ref;
-  run(`npx tsx scripts/install-core.ts "${TARGET_PROJECT}"`, INSTALL_DIR);
+  console.log(`     - Synchronizing to ${ref}...`);
+
+  // 4. Fetch and checkout the desired ref BEFORE running any scripts
+  //    This is critical: the installed version may be old and missing scripts
+  runSilent('git am --abort', INSTALL_DIR);
+  runSilent('git merge --abort', INSTALL_DIR);
+  run('git fetch origin --tags --force', INSTALL_DIR);
+  run('git reset --hard HEAD', INSTALL_DIR);
+  run('git clean -fd', INSTALL_DIR);
+  run(`git checkout ${ref}`, INSTALL_DIR);
+  
+  // If it's a branch, reset to origin/branch. If it's a tag/sha, this will fail silently.
+  runSilent(`git reset --hard origin/${ref}`, INSTALL_DIR) || 
+    run(`git reset --hard ${ref}`, INSTALL_DIR);
+  
+  run('git clean -fd', INSTALL_DIR);
+  run('git submodule update --init --recursive', INSTALL_DIR);
+
+  // 5. Install dependencies
+  console.log('     - Installing dependencies...');
+  run('npm install --quiet', INSTALL_DIR);
+
+  // 6. Sync commands from Conductor
+  console.log('     - Syncing Conductor commands...');
+  run('npm run sync', INSTALL_DIR);
+
+  // 7. Link to the target project
+  console.log(`     - Linking to project: ${TARGET_PROJECT}`);
+  run(`npx tsx scripts/setup-bridge.ts "${TARGET_PROJECT}"`, INSTALL_DIR);
 
   console.log('\n✅ Ready! The /conductor.* commands are now available.');
 }
