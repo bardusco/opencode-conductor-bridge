@@ -6,7 +6,7 @@ description: Displays the current progress of the project
 
 > [!NOTE]
 > This command is bridged from Gemini Conductor.
-> **Bridge Version:** 1.1.0
+> **Bridge Version:** 1.1.5
 > **Conductor Source:** [status.toml](https://github.com/gemini-cli-extensions/conductor/blob/b49d77058ccd5ccedc83c1974cc36a2340b637ab/commands/conductor/status.toml)
 > **Local Reference:** `{{CONDUCTOR_ROOT}}/commands/conductor/status.toml`
 

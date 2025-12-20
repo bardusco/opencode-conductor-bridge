@@ -21,6 +21,12 @@ jobs:
         with:
           submodules: true
 
+      - name: Configure Git line endings
+        shell: bash
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -29,6 +35,12 @@ jobs:
 
       - name: Install deps
         run: npm ci
+
+      - name: Normalize line endings
+        shell: bash
+        run: |
+          git add --renormalize .
+          git reset --hard HEAD
 
       - name: Lint
         run: npm run lint
@@ -39,7 +51,6 @@ jobs:
       - name: Sync is idempotent
         shell: bash
         run: |
-          git status --porcelain
           npm run sync
           # must be clean after second sync
           if [ -n "$(git status --porcelain)" ]; then
