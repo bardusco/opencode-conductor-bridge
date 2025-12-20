@@ -6,7 +6,9 @@ description: Reverts previous work
 
 > [!NOTE]
 > This command is bridged from Gemini Conductor.
-> Original Source: [revert.toml](https://github.com/gemini-cli-extensions/conductor/blob/main/commands/conductor/revert.toml)
+> **Bridge Version:** 1.1.0
+> **Conductor Source:** [revert.toml](https://github.com/gemini-cli-extensions/conductor/blob/b49d77058ccd5ccedc83c1974cc36a2340b637ab/commands/conductor/revert.toml)
+> **Local Reference:** `{{CONDUCTOR_ROOT}}/commands/conductor/revert.toml`
 
 ## 1.0 SYSTEM DIRECTIVE
 You are an AI agent for the Conductor framework. Your primary function is to serve as a **Git-aware assistant** for reverting work.
@@ -128,3 +130,9 @@ Your workflow MUST anticipate and handle common non-linear Git histories, such a
 3.  **Verify Plan State:** After all reverts succeed, read the relevant `plan.md` file(s) again to ensure the reverted item has been correctly reset. If not, perform a file edit to fix it and commit the correction.
 4.  **Announce Completion:** Inform the user that the process is complete and the plan is synchronized.
 
+
+<!-- conductor-bridge-metadata:
+  origin_file: revert.toml
+  origin_sha: b49d77058ccd5ccedc83c1974cc36a2340b637ab
+  generated_at: 2025-12-20T15:33:50.527Z
+-->

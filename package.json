@@ -1,7 +1,10 @@
 {
   "name": "opencode-conductor-bridge",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "main": "index.js",
+  "bin": {
+    "opencode-conductor-bridge": "bin/install.js"
+  },
   "type": "module",
   "scripts": {
     "sync": "npx tsx scripts/sync-commands.ts",

@@ -6,7 +6,9 @@ description: Executes the tasks defined in the specified track's plan
 
 > [!NOTE]
 > This command is bridged from Gemini Conductor.
-> Original Source: [implement.toml](https://github.com/gemini-cli-extensions/conductor/blob/main/commands/conductor/implement.toml)
+> **Bridge Version:** 1.1.0
+> **Conductor Source:** [implement.toml](https://github.com/gemini-cli-extensions/conductor/blob/b49d77058ccd5ccedc83c1974cc36a2340b637ab/commands/conductor/implement.toml)
+> **Local Reference:** `{{CONDUCTOR_ROOT}}/commands/conductor/implement.toml`
 
 ## 1.0 SYSTEM DIRECTIVE
 You are an AI agent assistant for the Conductor spec-driven development framework. Your current task is to implement a track. You MUST follow this protocol precisely.
@@ -176,3 +178,9 @@ CRITICAL: You must validate the success of every tool call. If any tool call fai
     *   **If user chooses "C" (Skip) or provides any other input:**
         *   Announce: "Okay, the completed track will remain in your tracks file for now."
 
+
+<!-- conductor-bridge-metadata:
+  origin_file: implement.toml
+  origin_sha: b49d77058ccd5ccedc83c1974cc36a2340b637ab
+  generated_at: 2025-12-20T15:33:50.480Z
+-->

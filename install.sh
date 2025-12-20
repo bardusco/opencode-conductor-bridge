@@ -2,12 +2,21 @@
 set -e
 
 # Configuration
-VERSION="1.0.1"
+VERSION="1.1.0"
 REPO_URL="https://github.com/bardusco/opencode-conductor-bridge.git"
 INSTALL_DIR="$HOME/.opencode/conductor-bridge"
 TARGET_PROJECT=$(pwd)
 
+# Allow pinning to a specific version/tag/sha
+# If not provided, we will try to find the latest tag, or fallback to main
+if [ -z "$BRIDGE_REF" ]; then
+    # Try to get latest tag, if fails or no tags, use main
+    LATEST_TAG=$(git ls-remote --tags --sort="v:refname" "$REPO_URL" | tail -n1 | sed 's/.*\///' | sed 's/\^{}//')
+    BRIDGE_REF=${LATEST_TAG:-main}
+fi
+
 echo "🚀 Installing OpenCode Conductor Bridge (v$VERSION)..."
+echo "     - Ref: $BRIDGE_REF"
 
 # 1. Ensure the base directory exists
 mkdir -p "$HOME/.opencode"
@@ -22,14 +31,16 @@ if [ -d "$INSTALL_DIR" ]; then
     git reset --hard HEAD > /dev/null 2>&1 || true
     git clean -fd > /dev/null 2>&1 || true
     
-    # Force reset to remote state
-    git fetch origin main
-    git reset --hard origin/main
+    # Force reset to the specified ref
+    git fetch origin "$BRIDGE_REF"
+    git checkout "$BRIDGE_REF"
+    git reset --hard "origin/$BRIDGE_REF" 2>/dev/null || git reset --hard "$BRIDGE_REF"
     git clean -fd
     git submodule update --init --recursive
 else
     echo "     - Cloning bridge in $INSTALL_DIR..."
-    git clone --recursive "$REPO_URL" "$INSTALL_DIR"
+    git clone --recursive --branch "$BRIDGE_REF" "$REPO_URL" "$INSTALL_DIR" 2>/dev/null || \
+    (git clone --recursive "$REPO_URL" "$INSTALL_DIR" && cd "$INSTALL_DIR" && git checkout "$BRIDGE_REF")
     cd "$INSTALL_DIR"
 fi
 

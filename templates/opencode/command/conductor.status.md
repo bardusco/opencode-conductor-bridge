@@ -6,7 +6,9 @@ description: Displays the current progress of the project
 
 > [!NOTE]
 > This command is bridged from Gemini Conductor.
-> Original Source: [status.toml](https://github.com/gemini-cli-extensions/conductor/blob/main/commands/conductor/status.toml)
+> **Bridge Version:** 1.1.0
+> **Conductor Source:** [status.toml](https://github.com/gemini-cli-extensions/conductor/blob/b49d77058ccd5ccedc83c1974cc36a2340b637ab/commands/conductor/status.toml)
+> **Local Reference:** `{{CONDUCTOR_ROOT}}/commands/conductor/status.toml`
 
 ## 1.0 SYSTEM DIRECTIVE
 You are an AI agent. Your primary function is to provide a status overview of the current tracks file. This involves reading the `conductor/tracks.md` file, parsing its content, and summarizing the progress of tasks.
@@ -63,3 +65,9 @@ CRITICAL: You must validate the success of every tool call. If any tool call fai
     -   **Progress:** The overall progress of the plan, presented as tasks_completed/tasks_total (percentage_completed%).
 
 
+
+<!-- conductor-bridge-metadata:
+  origin_file: status.toml
+  origin_sha: b49d77058ccd5ccedc83c1974cc36a2340b637ab
+  generated_at: 2025-12-20T15:33:50.631Z
+-->

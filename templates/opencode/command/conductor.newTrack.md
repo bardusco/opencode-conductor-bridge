@@ -6,7 +6,9 @@ description: Plans a track, generates track-specific spec documents and updates 
 
 > [!NOTE]
 > This command is bridged from Gemini Conductor.
-> Original Source: [newTrack.toml](https://github.com/gemini-cli-extensions/conductor/blob/main/commands/conductor/newTrack.toml)
+> **Bridge Version:** 1.1.0
+> **Conductor Source:** [newTrack.toml](https://github.com/gemini-cli-extensions/conductor/blob/b49d77058ccd5ccedc83c1974cc36a2340b637ab/commands/conductor/newTrack.toml)
+> **Local Reference:** `{{CONDUCTOR_ROOT}}/commands/conductor/newTrack.toml`
 
 ## 1.0 SYSTEM DIRECTIVE
 You are an AI agent assistant for the Conductor spec-driven development framework. Your current task is to guide the user through the creation of a new "Track" (a feature or bug fix), generate the necessary specification (`spec.md`) and plan (`plan.md`) files, and organize them within a dedicated track directory.
@@ -148,3 +150,9 @@ CRITICAL: You must validate the success of every tool call. If any tool call fai
     > "New track '<track_id>' has been created and added to the tracks file. You can now start implementation by running `/conductor:implement`."
 
 
+
+<!-- conductor-bridge-metadata:
+  origin_file: newTrack.toml
+  origin_sha: b49d77058ccd5ccedc83c1974cc36a2340b637ab
+  generated_at: 2025-12-20T15:33:50.505Z
+-->

@@ -6,7 +6,9 @@ description: Scaffolds the project and sets up the Conductor environment
 
 > [!NOTE]
 > This command is bridged from Gemini Conductor.
-> Original Source: [setup.toml](https://github.com/gemini-cli-extensions/conductor/blob/main/commands/conductor/setup.toml)
+> **Bridge Version:** 1.1.0
+> **Conductor Source:** [setup.toml](https://github.com/gemini-cli-extensions/conductor/blob/b49d77058ccd5ccedc83c1974cc36a2340b637ab/commands/conductor/setup.toml)
+> **Local Reference:** `{{CONDUCTOR_ROOT}}/commands/conductor/setup.toml`
 
 ## 1.0 SYSTEM DIRECTIVE
 You are an AI agent. Your primary function is to set up and manage a software project using the Conductor methodology. This document is your operational protocol. Adhere to these instructions precisely and sequentially. Do not make assumptions.
@@ -430,3 +432,9 @@ CRITICAL: When determining model complexity, ALWAYS select the "flash" model, re
 2.  **Save Conductor Files:** Add and commit all files with the commit message `conductor(setup): Add conductor setup files`.
 3.  **Next Steps:** Inform the user that they can now begin work by running `/conductor:implement`.
 
+
+<!-- conductor-bridge-metadata:
+  origin_file: setup.toml
+  origin_sha: b49d77058ccd5ccedc83c1974cc36a2340b637ab
+  generated_at: 2025-12-20T15:33:50.622Z
+-->
