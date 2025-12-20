@@ -38,22 +38,19 @@ Once installed, you can use the following commands in OpenCode:
 
 ## Maintenance
 
-To update the bridge with the latest Conductor features:
+To update the bridge with the latest Conductor features, simply run:
 
-1. Update the submodule:
-   ```bash
-   git submodule update --remote
-   ```
+```bash
+npm run maintenance
+```
 
-2. Re-sync commands:
-   ```bash
-   npm run sync
-   ```
+Or via OpenCode:
+- `/conductor.bridge-update`
 
-3. Re-install to your projects:
-   ```bash
-   npx tsx scripts/setup-bridge.ts /path/to/your/project
-   ```
+To update the bridge in a **different** project:
+```bash
+npx tsx scripts/setup-bridge.ts /path/to/your/project
+```
 
 ## License
 

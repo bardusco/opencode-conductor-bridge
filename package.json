@@ -4,7 +4,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "sync": "ts-node-esm scripts/sync-commands.ts",
+    "sync": "npx tsx scripts/sync-commands.ts",
+    "maintenance": "git submodule update --remote && npm run sync && npx tsx scripts/setup-bridge.ts .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
