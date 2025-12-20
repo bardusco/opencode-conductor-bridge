@@ -1,4 +1,4 @@
-# OpenCode Conductor Bridge (v1.1.6)
+# OpenCode Conductor Bridge (v1.1.7)
 
 [![CI](https://github.com/bardusco/opencode-conductor-bridge/actions/workflows/ci.yml/badge.svg)](https://github.com/bardusco/opencode-conductor-bridge/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/github/v/tag/bardusco/opencode-conductor-bridge?label=version&color=blue)](https://github.com/bardusco/opencode-conductor-bridge/releases)
@@ -32,10 +32,10 @@ curl -sSL https://raw.githubusercontent.com/bardusco/opencode-conductor-bridge/m
 You can pin a specific version, tag, or SHA by setting the `BRIDGE_REF` environment variable:
 ```bash
 # Windows/Node
-$env:BRIDGE_REF="v1.1.6"; npx github:bardusco/opencode-conductor-bridge
+$env:BRIDGE_REF="v1.1.7"; npx github:bardusco/opencode-conductor-bridge
 
 # macOS/Linux
-BRIDGE_REF=v1.1.6 curl -sSL https://raw.githubusercontent.com/bardusco/opencode-conductor-bridge/main/install.sh | bash
+BRIDGE_REF=v1.1.7 curl -sSL https://raw.githubusercontent.com/bardusco/opencode-conductor-bridge/main/install.sh | bash
 ```
 
 ### What this does:
@@ -68,7 +68,8 @@ We focus on transparency and predictability:
 
 | Bridge Version | Conductor Submodule | OpenCode Version | Status |
 | :--- | :--- | :--- | :--- |
-| **v1.1.6** | [b49d770](https://github.com/gemini-cli-extensions/conductor/commit/b49d770) | >= 1.0.0 | ✅ Stable |
+| **v1.1.7** | [b49d770](https://github.com/gemini-cli-extensions/conductor/commit/b49d770) | >= 1.0.0 | ✅ Stable |
+| v1.1.6 | [b49d770](https://github.com/gemini-cli-extensions/conductor/commit/b49d770) | >= 1.0.0 | ✅ Stable |
 | v1.1.5 | [b49d770](https://github.com/gemini-cli-extensions/conductor/commit/b49d770) | >= 1.0.0 | ✅ Legacy |
 | v1.1.4 | [b49d770](https://github.com/gemini-cli-extensions/conductor/commit/b49d770) | >= 1.0.0 | ✅ Legacy |
 | v1.1.3 | [b49d770](https://github.com/gemini-cli-extensions/conductor/commit/b49d770) | >= 1.0.0 | ✅ Legacy |
