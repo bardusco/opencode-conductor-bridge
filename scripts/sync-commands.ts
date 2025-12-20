@@ -16,17 +16,29 @@ function getSubmoduleSha() {
   }
 }
 
-function getPackageVersion() {
+function getPackageVersion(): string {
+  const pkgPath = path.join(process.cwd(), 'package.json');
   try {
-    const pkg = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf-8'));
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+    if (!pkg.version) {
+      throw new Error('package.json missing "version" field');
+    }
     return pkg.version;
   } catch (e) {
-    return '1.1.7';
+    const error = e as Error;
+    console.error(`ERROR: Failed to read version from ${pkgPath}: ${error.message}`);
+    console.error('This usually means the script is running from the wrong directory.');
+    process.exit(1);
   }
 }
 
-function yamlEscape(str: string) {
-  return str.replace(/"/g, '\\"').replace(/\n/g, ' ');
+function yamlEscape(str: string): string {
+  // In YAML double-quoted strings, backslash introduces escape sequences
+  // Order matters: escape backslash first, then quotes, then newlines
+  return str
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, ' ');
 }
 
 async function sync() {
