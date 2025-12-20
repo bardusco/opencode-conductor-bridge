@@ -13,7 +13,10 @@
     "verify:docs": "npx tsx scripts/verify-docs.ts",
     "maintenance": "git merge --abort || true && git reset --hard origin/main && git clean -fd && git submodule update --init --recursive && npm run sync && npx tsx scripts/setup-bridge.ts .",
     "uninstall": "npx tsx scripts/uninstall-bridge.ts",
-    "test": "npm run lint && npm run sync && npm run verify:compat && npm run verify:docs"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "check": "npm run lint && npm run sync && npm run verify:compat && npm run verify:docs && npm run test:coverage"
   },
   "keywords": [],
   "author": "Danilo Bardusco <danilo@bardusco.com>",
@@ -21,9 +24,11 @@
   "description": "Bridge Gemini Conductor's Context-Driven Development protocol to OpenCode.",
   "devDependencies": {
     "@types/node": "^25.0.3",
+    "@vitest/coverage-v8": "^4.0.16",
     "toml": "^3.0.0",
     "ts-node": "^10.9.2",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.16"
   }
 }
