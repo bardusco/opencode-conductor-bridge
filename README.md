@@ -29,6 +29,7 @@ Once installed, you can use the following commands in OpenCode:
 - `/conductor.status`: Check the progress of your tracks.
 - `/conductor.revert`: Revert a track or task.
 - `/conductor.bridge-update`: Update the bridge and its commands to the latest version.
+- `/conductor.uninstall`: Remove bridge commands from the current project.
 
 ## Maintenance
 
@@ -40,6 +41,17 @@ npm run maintenance
 
 Or via OpenCode:
 - `/conductor.bridge-update`
+
+## Uninstall
+
+To remove the bridge commands from your project, run:
+
+```bash
+npm run uninstall -- /path/to/your/project
+```
+
+Or via OpenCode:
+- `/conductor.uninstall`
 
 ## License
 

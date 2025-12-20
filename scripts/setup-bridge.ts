@@ -12,7 +12,7 @@ async function setup() {
     fs.mkdirSync(targetOpencodeDir, { recursive: true });
   }
 
-  const commandsDir = path.join(BRIDGE_ROOT, '.opencode/command');
+  const commandsDir = path.join(BRIDGE_ROOT, 'templates/opencode/command');
   const files = fs.readdirSync(commandsDir).filter(f => f.endsWith('.md'));
 
   for (const file of files) {
@@ -25,6 +25,7 @@ async function setup() {
     
     // Replace the placeholder with the absolute path to THIS bridge's vendor
     content = content.split('{{CONDUCTOR_ROOT}}').join(VENDOR_CONDUCTOR);
+    content = content.split('{{BRIDGE_ROOT}}').join(BRIDGE_ROOT);
     
     fs.writeFileSync(dest, content);
     console.log(`Installed ${file} to ${targetOpencodeDir}`);
