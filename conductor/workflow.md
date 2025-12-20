@@ -298,31 +298,178 @@ A task is complete when:
 4. Notify affected users (if any)
 5. Document and update security procedures
 
-## Deployment Workflow
+## Release Workflow
 
-### Pre-Deployment Checklist
-- [ ] All tests passing
-- [ ] Coverage >80%
-- [ ] No linting errors
-- [ ] Mobile testing complete
-- [ ] Environment variables configured
-- [ ] Database migrations ready
-- [ ] Backup created
+This project uses semantic versioning and GitHub releases. The installation script (`bin/install.js`) automatically fetches the latest stable tag.
 
-### Deployment Steps
-1. Merge feature branch to main
-2. Tag release with version
-3. Push to deployment service
-4. Run database migrations
-5. Verify deployment
-6. Test critical paths
-7. Monitor for errors
+### Pre-Release Checklist
 
-### Post-Deployment
-1. Monitor analytics
-2. Check error logs
-3. Gather user feedback
-4. Plan next iteration
+Before starting the release process, verify:
+
+- [ ] All tests passing (`npm test`)
+- [ ] Coverage >80% (`npm run test:coverage`)
+- [ ] No linting errors (`npm run lint`)
+- [ ] Sync is idempotent (`npm run sync` twice produces no changes)
+- [ ] Compatibility matrix is current (`npm run verify:compat`)
+- [ ] Documentation versions match (`npm run verify:docs`)
+
+**Quick Check Command:**
+```bash
+npm run check
+```
+
+### Release Protocol
+
+#### 1. Prepare Feature Branch
+
+```bash
+# Ensure you're on your feature branch with all changes committed
+git status
+
+# Run full verification
+npm run check
+```
+
+#### 2. Push and Create Pull Request
+
+```bash
+# Push feature branch to remote
+git push -u origin <branch-name>
+
+# Create PR using GitHub CLI
+gh pr create --title "<type>: <description>" --body "## Summary
+- <bullet points describing changes>
+"
+```
+
+#### 3. Merge to Main
+
+After PR approval:
+```bash
+# Merge via GitHub UI or CLI
+gh pr merge --squash --delete-branch
+```
+
+#### 4. Create Release (Version Bump)
+
+```bash
+# Switch to main and pull latest
+git checkout main
+git pull origin main
+
+# Bump version in package.json (choose one)
+npm version patch  # For bug fixes (1.0.0 -> 1.0.1)
+npm version minor  # For new features (1.0.0 -> 1.1.0)
+npm version major  # For breaking changes (1.0.0 -> 2.0.0)
+
+# This automatically:
+# - Updates package.json version
+# - Creates a git commit
+# - Creates a git tag (v1.x.x)
+```
+
+#### 5. Update Documentation for New Version
+
+```bash
+# Update README.md with new version references:
+# - Title: "OpenCode Conductor Bridge (vX.X.X)"
+# - Compatibility Matrix: Add new row with current Conductor SHA
+# - BRIDGE_REF examples
+# - git checkout examples
+
+# Regenerate templates with new version
+npm run sync
+
+# Verify all docs are in sync
+npm run verify:docs
+
+# Commit documentation updates
+git add README.md templates/
+git commit --amend --no-edit
+
+# Update the tag to include doc changes
+git tag -d v<version>
+git tag v<version>
+```
+
+#### 6. Push Release
+
+```bash
+# Push main branch and tags
+git push origin main --tags
+```
+
+#### 7. Create GitHub Release
+
+```bash
+# Create release with auto-generated notes
+gh release create v<version> --generate-notes
+
+# Or with custom notes
+gh release create v<version> --title "v<version>" --notes "## What's Changed
+- <changes>
+"
+```
+
+### Post-Release Verification
+
+1. **Verify tag is published:**
+   ```bash
+   git ls-remote --tags origin | grep v<version>
+   ```
+
+2. **Test installation from fresh environment:**
+   ```bash
+   # In a new directory
+   npx opencode-conductor-bridge
+   ```
+
+3. **Verify installed version:**
+   ```bash
+   cat ~/.opencode/conductor-bridge/package.json | grep version
+   ```
+
+### Hotfix Protocol
+
+For urgent fixes to production:
+
+```bash
+# 1. Create hotfix branch from main
+git checkout main
+git pull origin main
+git checkout -b hotfix/<description>
+
+# 2. Make minimal fix with tests
+# ... implement fix ...
+npm test
+
+# 3. Fast-track PR
+git push -u origin hotfix/<description>
+gh pr create --title "fix: <description>" --body "Hotfix for <issue>"
+
+# 4. After merge, release as patch
+git checkout main
+git pull origin main
+npm version patch
+# ... follow steps 5-7 above ...
+```
+
+### Rollback Protocol
+
+If a release has critical issues:
+
+```bash
+# 1. Identify last good version
+git tag --list 'v*' --sort=-version:refname
+
+# 2. Users can pin to specific version
+BRIDGE_REF="v<good-version>" npx opencode-conductor-bridge
+
+# 3. If needed, yank bad release (removes from GitHub releases, keeps tag)
+gh release delete v<bad-version>
+
+# 4. Create fix and release new patch version
+```
 
 ## Continuous Improvement
 
