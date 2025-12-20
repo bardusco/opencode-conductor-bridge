@@ -16,8 +16,8 @@
 
 ## Phase 3: Verification Script Tests
 
-- [ ] Task: Write tests for `scripts/verify-compat.ts`
-- [ ] Task: Write tests for `scripts/verify-docs.ts`
+- [x] Task: Write tests for `scripts/verify-compat.ts` (5926107)
+- [~] Task: Write tests for `scripts/verify-docs.ts`
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Verification Script Tests' (Protocol in workflow.md)
 
 ## Phase 4: Installation Script Tests
