@@ -1,0 +1,3 @@
+[submodule "vendor/conductor"]
+	path = vendor/conductor
+	url = https://github.com/gemini-cli-extensions/conductor.git
