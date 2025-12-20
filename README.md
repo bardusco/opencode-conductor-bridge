@@ -1,5 +1,10 @@
 # OpenCode Conductor Bridge (v1.1.3)
 
+[![CI](https://github.com/bardusco/opencode-conductor-bridge/actions/workflows/ci.yml/badge.svg)](https://github.com/bardusco/opencode-conductor-bridge/actions/workflows/ci.yml)
+[![Version](https://img.shields.io/github/v/tag/bardusco/opencode-conductor-bridge?label=version&color=blue)](https://github.com/bardusco/opencode-conductor-bridge/releases)
+[![License](https://img.shields.io/github/license/bardusco/opencode-conductor-bridge?color=orange)](./LICENSE)
+[![Conductor Upstream](https://img.shields.io/badge/conductor-upstream-blueviolet)](https://github.com/gemini-cli-extensions/conductor)
+
 Bridge Gemini Conductor's Context-Driven Development (CDD) protocol to OpenCode.
 
 ## Overview
@@ -80,14 +85,6 @@ We welcome contributions! To set up your development environment:
 - Ensure `npm test` passes.
 - If you update the Conductor submodule, update the Compatibility Matrix in the README.
 - Sync commands before committing: `npm run sync`.
-
-## License
-
-This bridge is distributed under the same license as Gemini Conductor (Apache-2.0). See [LICENSE](./LICENSE) and [NOTICE](./NOTICE) for details.
-
-*Attribution: Based on the [Conductor](https://github.com/gemini-cli-extensions/conductor) project by Google.*
-
-
 
 ## License
 
