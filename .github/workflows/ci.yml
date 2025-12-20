@@ -6,6 +6,11 @@ on:
     tags: [ "v*.*.*" ]
   pull_request:
 
+# Avoid duplicate runs for the same commit (e.g. branch push + tag push)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.sha }}
+  cancel-in-progress: true
+
 jobs:
   test:
     strategy:
