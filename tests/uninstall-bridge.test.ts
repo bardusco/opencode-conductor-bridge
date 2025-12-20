@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as fs from 'fs';
+import * as path from 'path';
 import {
   createDefaultConfig,
   removeConductorFiles,
@@ -21,9 +22,10 @@ describe('uninstall-bridge', () => {
 
   describe('createDefaultConfig', () => {
     it('should create config with provided target project', () => {
-      const config = createDefaultConfig('/test/project');
+      const targetProject = path.join('test', 'project');
+      const config = createDefaultConfig(targetProject);
 
-      expect(config.targetProject).toBe('/test/project');
+      expect(config.targetProject).toBe(targetProject);
     });
   });
 
@@ -46,14 +48,15 @@ describe('uninstall-bridge', () => {
         'README.md',
       ] as unknown as ReturnType<typeof fs.readdirSync>);
       vi.mocked(fs.unlinkSync).mockReturnValue(undefined);
-
-      const result = removeConductorFiles('/test/dir');
+      
+      const testDir = path.join('test', 'dir');
+      const result = removeConductorFiles(testDir);
 
       expect(result.directoryExists).toBe(true);
       expect(result.filesRemoved).toEqual(['conductor.setup.md', 'conductor.implement.md']);
       expect(fs.unlinkSync).toHaveBeenCalledTimes(2);
-      expect(fs.unlinkSync).toHaveBeenCalledWith('/test/dir/conductor.setup.md');
-      expect(fs.unlinkSync).toHaveBeenCalledWith('/test/dir/conductor.implement.md');
+      expect(fs.unlinkSync).toHaveBeenCalledWith(path.join(testDir, 'conductor.setup.md'));
+      expect(fs.unlinkSync).toHaveBeenCalledWith(path.join(testDir, 'conductor.implement.md'));
     });
 
     it('should return empty filesRemoved when no conductor files exist', () => {
@@ -63,7 +66,7 @@ describe('uninstall-bridge', () => {
         'README.md',
       ] as unknown as ReturnType<typeof fs.readdirSync>);
 
-      const result = removeConductorFiles('/test/dir');
+      const result = removeConductorFiles(path.join('test', 'dir'));
 
       expect(result.directoryExists).toBe(true);
       expect(result.filesRemoved).toEqual([]);
@@ -72,8 +75,9 @@ describe('uninstall-bridge', () => {
   });
 
   describe('uninstall', () => {
+    const testBase = path.join('test', 'project');
     const mockConfig: UninstallConfig = {
-      targetProject: '/test/project',
+      targetProject: testBase,
     };
 
     beforeEach(() => {
@@ -84,14 +88,15 @@ describe('uninstall-bridge', () => {
     it('should return correct directory paths', async () => {
       const result = await uninstall(mockConfig);
 
-      expect(result.targetOpencodeDir).toBe('/test/project/.opencode/command');
-      expect(result.legacyOpencodeDir).toBe('/test/project/.opencode/commands');
-      expect(result.conductorStateDir).toBe('/test/project/conductor');
+      expect(result.targetOpencodeDir).toBe(path.join(testBase, '.opencode', 'command'));
+      expect(result.legacyOpencodeDir).toBe(path.join(testBase, '.opencode', 'commands'));
+      expect(result.conductorStateDir).toBe(path.join(testBase, 'conductor'));
     });
 
     it('should remove files from target opencode directory', async () => {
+      const targetDir = path.join(testBase, '.opencode', 'command');
       vi.mocked(fs.existsSync).mockImplementation((p) => {
-        return p === '/test/project/.opencode/command';
+        return String(p) === targetDir;
       });
       vi.mocked(fs.readdirSync).mockReturnValue([
         'conductor.setup.md',
@@ -104,8 +109,9 @@ describe('uninstall-bridge', () => {
     });
 
     it('should remove files from legacy opencode directory', async () => {
+      const legacyDir = path.join(testBase, '.opencode', 'commands');
       vi.mocked(fs.existsSync).mockImplementation((p) => {
-        return p === '/test/project/.opencode/commands';
+        return String(p) === legacyDir;
       });
       vi.mocked(fs.readdirSync).mockReturnValue([
         'conductor.implement.md',
@@ -118,8 +124,9 @@ describe('uninstall-bridge', () => {
     });
 
     it('should detect conductor state directory existence', async () => {
+      const conductorDir = path.join(testBase, 'conductor');
       vi.mocked(fs.existsSync).mockImplementation((p) => {
-        return p === '/test/project/conductor';
+        return String(p) === conductorDir;
       });
 
       const result = await uninstall(mockConfig);
@@ -136,15 +143,17 @@ describe('uninstall-bridge', () => {
     });
 
     it('should remove files from both target and legacy directories', async () => {
+      const targetDir = path.join(testBase, '.opencode', 'command');
+      const legacyDir = path.join(testBase, '.opencode', 'commands');
+      
       vi.mocked(fs.existsSync).mockImplementation((p) => {
-        return p === '/test/project/.opencode/command' || 
-               p === '/test/project/.opencode/commands';
+        return String(p) === targetDir || String(p) === legacyDir;
       });
       vi.mocked(fs.readdirSync).mockImplementation(((dirPath: fs.PathLike) => {
-        if (String(dirPath) === '/test/project/.opencode/command') {
+        if (String(dirPath) === targetDir) {
           return ['conductor.a.md'];
         }
-        if (String(dirPath) === '/test/project/.opencode/commands') {
+        if (String(dirPath) === legacyDir) {
           return ['conductor.b.md'];
         }
         return [];

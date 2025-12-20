@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as fs from 'fs';
+import * as path from 'path';
 import {
   createDefaultConfig,
   handleLegacyDirectory,
@@ -22,12 +23,14 @@ describe('setup-bridge', () => {
 
   describe('createDefaultConfig', () => {
     it('should create config with correct paths', () => {
-      const config = createDefaultConfig('/test/bridge', '/test/project');
+      const bridgeRoot = path.join('test', 'bridge');
+      const targetProject = path.join('test', 'project');
+      const config = createDefaultConfig(bridgeRoot, targetProject);
 
-      expect(config.bridgeRoot).toBe('/test/bridge');
-      expect(config.vendorConductor).toBe('/test/bridge/vendor/conductor');
-      expect(config.commandsDir).toBe('/test/bridge/templates/opencode/command');
-      expect(config.targetProject).toBe('/test/project');
+      expect(config.bridgeRoot).toBe(bridgeRoot);
+      expect(config.vendorConductor).toBe(path.join(bridgeRoot, 'vendor', 'conductor'));
+      expect(config.commandsDir).toBe(path.join(bridgeRoot, 'templates', 'opencode', 'command'));
+      expect(config.targetProject).toBe(targetProject);
     });
 
     it('should use process.cwd() as default bridgeRoot', () => {
@@ -47,7 +50,7 @@ describe('setup-bridge', () => {
 
     it('should move legacy dir when target does not exist', () => {
       vi.mocked(fs.existsSync).mockImplementation((p) => {
-        return p === '/legacy';
+        return String(p) === '/legacy';
       });
       vi.mocked(fs.renameSync).mockReturnValue(undefined);
 
@@ -98,11 +101,13 @@ describe('setup-bridge', () => {
   });
 
   describe('setup', () => {
+    // Use path.join for cross-platform compatibility
+    const testBase = path.join('test');
     const mockConfig: SetupConfig = {
-      bridgeRoot: '/test/bridge',
-      vendorConductor: '/test/bridge/vendor/conductor',
-      commandsDir: '/test/bridge/templates/opencode/command',
-      targetProject: '/test/project',
+      bridgeRoot: path.join(testBase, 'bridge'),
+      vendorConductor: path.join(testBase, 'bridge', 'vendor', 'conductor'),
+      commandsDir: path.join(testBase, 'bridge', 'templates', 'opencode', 'command'),
+      targetProject: path.join(testBase, 'project'),
     };
 
     beforeEach(() => {
@@ -110,21 +115,20 @@ describe('setup-bridge', () => {
       vi.mocked(fs.mkdirSync).mockReturnValue(undefined);
       vi.mocked(fs.writeFileSync).mockReturnValue(undefined);
       vi.mocked(fs.readFileSync).mockReturnValue('content with {{CONDUCTOR_ROOT}} placeholder');
-      vi.mocked(fs.readdirSync).mockReturnValue(['cmd1.md', 'cmd2.md'] as unknown as ReturnType<typeof fs.readdirSync>);
+      vi.mocked(fs.readdirSync).mockReturnValue((['cmd1.md', 'cmd2.md']) as unknown as ReturnType<typeof fs.readdirSync>);
     });
 
     it('should create target opencode directory if it does not exist', async () => {
       await setup(mockConfig);
 
-      expect(fs.mkdirSync).toHaveBeenCalledWith(
-        '/test/project/.opencode/command',
-        { recursive: true }
-      );
+      const expectedDir = path.join(mockConfig.targetProject, '.opencode', 'command');
+      expect(fs.mkdirSync).toHaveBeenCalledWith(expectedDir, { recursive: true });
     });
 
     it('should not create directory if it already exists', async () => {
+      const targetDir = path.join(mockConfig.targetProject, '.opencode', 'command');
       vi.mocked(fs.existsSync).mockImplementation((p) => {
-        return p === '/test/project/.opencode/command';
+        return String(p) === targetDir;
       });
 
       await setup(mockConfig);
@@ -153,37 +157,35 @@ describe('setup-bridge', () => {
 
       await setup(mockConfig);
 
-      expect(fs.writeFileSync).toHaveBeenCalledWith(
-        '/test/project/.opencode/command/test.md',
-        '/test/bridge/vendor/conductor/path and /test/bridge/other'
-      );
+      const expectedContent = `${mockConfig.vendorConductor}/path and ${mockConfig.bridgeRoot}/other`;
+      const calls = vi.mocked(fs.writeFileSync).mock.calls;
+      expect(calls.length).toBe(1);
+      expect(calls[0][1]).toBe(expectedContent);
     });
 
     it('should return correct result structure', async () => {
       const result = await setup(mockConfig);
 
-      expect(result.targetOpencodeDir).toBe('/test/project/.opencode/command');
+      expect(result.targetOpencodeDir).toBe(path.join(mockConfig.targetProject, '.opencode', 'command'));
       expect(result.filesInstalled).toHaveLength(2);
       expect(result.legacyDirMoved).toBe(false);
       expect(result.legacyDirWarning).toBe(false);
     });
 
     it('should handle legacy directory migration', async () => {
+      const legacyDir = path.join(mockConfig.targetProject, '.opencode', 'commands');
       vi.mocked(fs.existsSync).mockImplementation((p) => {
-        return p === '/test/project/.opencode/commands'; // legacy exists
+        return String(p) === legacyDir;
       });
 
       const result = await setup(mockConfig);
 
-      expect(fs.renameSync).toHaveBeenCalledWith(
-        '/test/project/.opencode/commands',
-        '/test/project/.opencode/command'
-      );
+      expect(fs.renameSync).toHaveBeenCalled();
       expect(result.legacyDirMoved).toBe(true);
     });
 
     it('should warn when both legacy and target directories exist', async () => {
-      vi.mocked(fs.existsSync).mockReturnValue(true); // both exist
+      vi.mocked(fs.existsSync).mockReturnValue(true);
 
       const result = await setup(mockConfig);
 

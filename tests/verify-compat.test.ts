@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as fs from 'fs';
+import * as path from 'path';
 import { execSync } from 'child_process';
 import {
   createDefaultConfig,
@@ -25,11 +26,12 @@ describe('verify-compat', () => {
 
   describe('createDefaultConfig', () => {
     it('should create config with correct paths for given cwd', () => {
-      const config = createDefaultConfig('/test/project');
+      const cwd = path.join('test', 'project');
+      const config = createDefaultConfig(cwd);
 
-      expect(config.readmePath).toBe('/test/project/README.md');
-      expect(config.packagePath).toBe('/test/project/package.json');
-      expect(config.conductorPath).toBe('/test/project/vendor/conductor');
+      expect(config.readmePath).toBe(path.join(cwd, 'README.md'));
+      expect(config.packagePath).toBe(path.join(cwd, 'package.json'));
+      expect(config.conductorPath).toBe(path.join(cwd, 'vendor', 'conductor'));
     });
 
     it('should use process.cwd() when no cwd provided', () => {
@@ -42,7 +44,7 @@ describe('verify-compat', () => {
     it('should return version from package.json', () => {
       vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify({ version: '1.2.3' }));
 
-      const version = getPackageVersion('/test/package.json');
+      const version = getPackageVersion(path.join('test', 'package.json'));
 
       expect(version).toBe('1.2.3');
     });
@@ -51,10 +53,11 @@ describe('verify-compat', () => {
   describe('getConductorSha', () => {
     it('should return trimmed 7-char SHA from git command', () => {
       vi.mocked(execSync).mockReturnValue(Buffer.from('abc123def456789\n'));
+      const conductorPath = path.join('test', 'conductor');
 
-      const sha = getConductorSha('/test/conductor');
+      const sha = getConductorSha(conductorPath);
 
-      expect(execSync).toHaveBeenCalledWith('git rev-parse HEAD', { cwd: '/test/conductor' });
+      expect(execSync).toHaveBeenCalledWith('git rev-parse HEAD', { cwd: conductorPath });
       expect(sha).toBe('abc123d');
     });
 
@@ -63,7 +66,7 @@ describe('verify-compat', () => {
         throw new Error('git not found');
       });
 
-      expect(() => getConductorSha('/test/conductor')).toThrow('git not found');
+      expect(() => getConductorSha(path.join('test', 'conductor'))).toThrow('git not found');
     });
   });
 
@@ -108,18 +111,19 @@ describe('verify-compat', () => {
   });
 
   describe('verify', () => {
+    const testBase = path.join('test');
     const mockConfig: VerifyCompatConfig = {
-      readmePath: '/test/README.md',
-      packagePath: '/test/package.json',
-      conductorPath: '/test/vendor/conductor',
+      readmePath: path.join(testBase, 'README.md'),
+      packagePath: path.join(testBase, 'package.json'),
+      conductorPath: path.join(testBase, 'vendor', 'conductor'),
     };
 
     beforeEach(() => {
       vi.mocked(fs.readFileSync).mockImplementation((filePath) => {
-        if (filePath === mockConfig.packagePath) {
+        if (String(filePath) === mockConfig.packagePath) {
           return JSON.stringify({ version: '1.2.3' });
         }
-        if (filePath === mockConfig.readmePath) {
+        if (String(filePath) === mockConfig.readmePath) {
           return `| **v1.2.3** | [abc1234](https://github.com/...) |`;
         }
         return '';
@@ -150,10 +154,10 @@ describe('verify-compat', () => {
 
     it('should return error when version not in README matrix', async () => {
       vi.mocked(fs.readFileSync).mockImplementation((filePath) => {
-        if (filePath === mockConfig.packagePath) {
+        if (String(filePath) === mockConfig.packagePath) {
           return JSON.stringify({ version: '2.0.0' });
         }
-        if (filePath === mockConfig.readmePath) {
+        if (String(filePath) === mockConfig.readmePath) {
           return `| **v1.2.3** | [abc1234](https://github.com/...) |`;
         }
         return '';

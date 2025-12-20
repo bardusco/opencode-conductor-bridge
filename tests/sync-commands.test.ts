@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as fs from 'fs';
+import * as path from 'path';
 import { execSync } from 'child_process';
 import {
   createDefaultConfig,
@@ -27,29 +28,31 @@ describe('sync-commands', () => {
 
   describe('createDefaultConfig', () => {
     it('should create config with correct paths for given cwd', () => {
-      const cwd = '/test/project';
+      const cwd = path.join('test', 'project');
       const config = createDefaultConfig(cwd);
 
-      expect(config.conductorSource).toBe('/test/project/vendor/conductor');
-      expect(config.commandsSource).toBe('/test/project/vendor/conductor/commands/conductor');
-      expect(config.templatesSource).toBe('/test/project/vendor/conductor/templates/code_styleguides');
-      expect(config.outputDir).toBe('/test/project/templates/opencode/command');
-      expect(config.packageJsonPath).toBe('/test/project/package.json');
+      expect(config.conductorSource).toBe(path.join(cwd, 'vendor', 'conductor'));
+      expect(config.commandsSource).toBe(path.join(cwd, 'vendor', 'conductor', 'commands', 'conductor'));
+      expect(config.templatesSource).toBe(path.join(cwd, 'vendor', 'conductor', 'templates', 'code_styleguides'));
+      expect(config.outputDir).toBe(path.join(cwd, 'templates', 'opencode', 'command'));
+      expect(config.packageJsonPath).toBe(path.join(cwd, 'package.json'));
     });
 
     it('should use process.cwd() when no cwd provided', () => {
       const config = createDefaultConfig();
-      expect(config.conductorSource).toContain('vendor/conductor');
+      expect(config.conductorSource).toContain('vendor');
+      expect(config.conductorSource).toContain('conductor');
     });
   });
 
   describe('getSubmoduleSha', () => {
     it('should return SHA from git command', () => {
       vi.mocked(execSync).mockReturnValue(Buffer.from('abc123def456\n'));
+      const testPath = path.join('test', 'conductor');
 
-      const sha = getSubmoduleSha('/test/conductor');
+      const sha = getSubmoduleSha(testPath);
 
-      expect(execSync).toHaveBeenCalledWith('git rev-parse HEAD', { cwd: '/test/conductor' });
+      expect(execSync).toHaveBeenCalledWith('git rev-parse HEAD', { cwd: testPath });
       expect(sha).toBe('abc123def456');
     });
 
@@ -58,7 +61,7 @@ describe('sync-commands', () => {
         throw new Error('git not found');
       });
 
-      const sha = getSubmoduleSha('/test/conductor');
+      const sha = getSubmoduleSha(path.join('test', 'conductor'));
 
       expect(sha).toBe('main');
     });
@@ -67,23 +70,24 @@ describe('sync-commands', () => {
   describe('getPackageVersion', () => {
     it('should return version from package.json', () => {
       vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify({ version: '1.2.3' }));
+      const pkgPath = path.join('test', 'package.json');
 
-      const version = getPackageVersion('/test/package.json');
+      const version = getPackageVersion(pkgPath);
 
-      expect(fs.readFileSync).toHaveBeenCalledWith('/test/package.json', 'utf-8');
+      expect(fs.readFileSync).toHaveBeenCalledWith(pkgPath, 'utf-8');
       expect(version).toBe('1.2.3');
     });
 
     it('should throw error when version is missing', () => {
       vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify({ name: 'test' }));
 
-      expect(() => getPackageVersion('/test/package.json')).toThrow('package.json missing "version" field');
+      expect(() => getPackageVersion(path.join('test', 'package.json'))).toThrow('package.json missing "version" field');
     });
 
     it('should throw error when package.json is invalid JSON', () => {
       vi.mocked(fs.readFileSync).mockReturnValue('not valid json');
 
-      expect(() => getPackageVersion('/test/package.json')).toThrow();
+      expect(() => getPackageVersion(path.join('test', 'package.json'))).toThrow();
     });
   });
 
@@ -168,12 +172,14 @@ describe('sync-commands', () => {
   });
 
   describe('sync', () => {
+    // Use path.join for cross-platform compatibility
+    const testBase = path.join('test');
     const mockConfig: SyncConfig = {
-      conductorSource: '/test/vendor/conductor',
-      commandsSource: '/test/vendor/conductor/commands/conductor',
-      templatesSource: '/test/vendor/conductor/templates/code_styleguides',
-      outputDir: '/test/templates/opencode/command',
-      packageJsonPath: '/test/package.json',
+      conductorSource: path.join(testBase, 'vendor', 'conductor'),
+      commandsSource: path.join(testBase, 'vendor', 'conductor', 'commands', 'conductor'),
+      templatesSource: path.join(testBase, 'vendor', 'conductor', 'templates', 'code_styleguides'),
+      outputDir: path.join(testBase, 'templates', 'opencode', 'command'),
+      packageJsonPath: path.join(testBase, 'package.json'),
     };
 
     beforeEach(() => {
@@ -183,7 +189,7 @@ describe('sync-commands', () => {
       vi.mocked(fs.writeFileSync).mockReturnValue(undefined);
       vi.mocked(execSync).mockReturnValue(Buffer.from('abc123def'));
       vi.mocked(fs.readFileSync).mockImplementation((filePath) => {
-        if (filePath === mockConfig.packageJsonPath) {
+        if (String(filePath) === mockConfig.packageJsonPath) {
           return JSON.stringify({ version: '1.0.0' });
         }
         if (String(filePath).endsWith('.toml')) {
@@ -204,7 +210,7 @@ describe('sync-commands', () => {
 
     it('should create output directory if it does not exist', async () => {
       vi.mocked(fs.existsSync).mockImplementation((p) => {
-        if (p === mockConfig.outputDir) return false;
+        if (String(p) === mockConfig.outputDir) return false;
         return true;
       });
 
@@ -226,29 +232,29 @@ describe('sync-commands', () => {
 
       expect(result.commandsGenerated).toContain('conductor.setup.md');
       expect(result.commandsGenerated).toContain('conductor.implement.md');
-      expect(fs.writeFileSync).toHaveBeenCalledWith(
-        '/test/templates/opencode/command/conductor.setup.md',
-        expect.any(String)
-      );
-      expect(fs.writeFileSync).toHaveBeenCalledWith(
-        '/test/templates/opencode/command/conductor.implement.md',
-        expect.any(String)
-      );
+      
+      // Check that writeFileSync was called with paths ending in the expected filenames
+      const calls = vi.mocked(fs.writeFileSync).mock.calls;
+      const setupCall = calls.find(call => String(call[0]).endsWith('conductor.setup.md'));
+      const implementCall = calls.find(call => String(call[0]).endsWith('conductor.implement.md'));
+      
+      expect(setupCall).toBeDefined();
+      expect(implementCall).toBeDefined();
     });
 
     it('should generate styleguide markdown when templates exist', async () => {
       const result = await sync(mockConfig);
 
       expect(result.styleguideGenerated).toBe(true);
-      expect(fs.writeFileSync).toHaveBeenCalledWith(
-        '/test/templates/opencode/command/conductor.styleguide.md',
-        expect.any(String)
-      );
+      
+      const calls = vi.mocked(fs.writeFileSync).mock.calls;
+      const styleguideCall = calls.find(call => String(call[0]).endsWith('conductor.styleguide.md'));
+      expect(styleguideCall).toBeDefined();
     });
 
     it('should not generate styleguide when templates directory does not exist', async () => {
       vi.mocked(fs.existsSync).mockImplementation((p) => {
-        if (p === mockConfig.templatesSource) return false;
+        if (String(p) === mockConfig.templatesSource) return false;
         return true;
       });
 
