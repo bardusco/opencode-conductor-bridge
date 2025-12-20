@@ -15,7 +15,9 @@ mkdir -p "$HOME/.opencode"
 if [ -d "$INSTALL_DIR" ]; then
     echo "     - Updating existing bridge in $INSTALL_DIR..."
     cd "$INSTALL_DIR"
-    git pull origin main
+    # Force reset to remote state to avoid pull conflicts with local generated files
+    git fetch origin main
+    git reset --hard origin/main
     git submodule update --init --recursive
 else
     echo "     - Cloning bridge in $INSTALL_DIR..."

@@ -7,6 +7,18 @@ const VENDOR_CONDUCTOR = path.join(BRIDGE_ROOT, 'vendor/conductor');
 async function setup() {
   const targetProject = process.argv[2] || process.cwd();
   const targetOpencodeDir = path.join(targetProject, '.opencode/command');
+  const legacyOpencodeDir = path.join(targetProject, '.opencode/commands');
+
+  // Handle legacy directory typo
+  if (fs.existsSync(legacyOpencodeDir)) {
+    console.log(`⚠️  Found legacy directory '${legacyOpencodeDir}'.`);
+    if (!fs.existsSync(targetOpencodeDir)) {
+      console.log(`     - Moving it to '${targetOpencodeDir}'...`);
+      fs.renameSync(legacyOpencodeDir, targetOpencodeDir);
+    } else {
+      console.log(`     - You should remove it to avoid typos: rm -rf ${legacyOpencodeDir}`);
+    }
+  }
 
   if (!fs.existsSync(targetOpencodeDir)) {
     fs.mkdirSync(targetOpencodeDir, { recursive: true });
