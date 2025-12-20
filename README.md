@@ -1,6 +1,7 @@
 # OpenCode Conductor Bridge (v1.1.14)
 
 [![CI](https://github.com/bardusco/opencode-conductor-bridge/actions/workflows/ci.yml/badge.svg)](https://github.com/bardusco/opencode-conductor-bridge/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/bardusco/opencode-conductor-bridge/graph/badge.svg)](https://codecov.io/gh/bardusco/opencode-conductor-bridge)
 [![Version](https://img.shields.io/github/v/tag/bardusco/opencode-conductor-bridge?label=version&color=blue)](https://github.com/bardusco/opencode-conductor-bridge/releases)
 [![License](https://img.shields.io/github/license/bardusco/opencode-conductor-bridge?color=orange)](./LICENSE)
 [![Conductor Upstream](https://img.shields.io/badge/conductor-upstream-blueviolet)](https://github.com/gemini-cli-extensions/conductor)
