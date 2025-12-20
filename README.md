@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/github/license/bardusco/opencode-conductor-bridge?color=orange)](./LICENSE)
 [![Conductor Upstream](https://img.shields.io/badge/conductor-upstream-blueviolet)](https://github.com/gemini-cli-extensions/conductor)
 
-Bridge [Gemini Conductor](https://github.com/gemini-cli-extensions/conductor) (a Gemini CLI extension) Context-Driven Development (CDD) protocol to OpenCode.
+Bridge [Gemini Conductor](https://github.com/gemini-cli-extensions/conductor) (a Gemini CLI extension) Context-Driven Development (CDD) protocol to [OpenCode](https://opencode.ai/).
 
 ## Overview
 
@@ -257,4 +257,4 @@ This bridge is distributed under the same license as Gemini Conductor (Apache-2.
 
 ---
 
-*Not affiliated with Google, Gemini CLI, or OpenCode.*
+*This is a community project, not affiliated with [Google](https://google.com), [Gemini CLI](https://github.com/google-gemini/gemini-cli), or [OpenCode](https://opencode.ai/).*
