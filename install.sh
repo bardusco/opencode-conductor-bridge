@@ -18,6 +18,7 @@ if [ -d "$INSTALL_DIR" ]; then
     # Force reset to remote state to avoid pull conflicts with local generated files
     git fetch origin main
     git reset --hard origin/main
+    git clean -fd
     git submodule update --init --recursive
 else
     echo "     - Cloning bridge in $INSTALL_DIR..."

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "sync": "npx tsx scripts/sync-commands.ts",
-    "maintenance": "git fetch origin main && git reset --hard origin/main && git submodule update --init --recursive && npm run sync && npx tsx scripts/setup-bridge.ts .",
+    "maintenance": "git fetch origin main && git reset --hard origin/main && git clean -fd && git submodule update --init --recursive && npm run sync && npx tsx scripts/setup-bridge.ts .",
     "uninstall": "npx tsx scripts/uninstall-bridge.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
