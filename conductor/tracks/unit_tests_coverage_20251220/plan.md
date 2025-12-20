@@ -7,12 +7,12 @@
 - [x] Task: Update package.json with test scripts (cb450c4)
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Test Infrastructure Setup' (Protocol in workflow.md) (23c274b)
 
-## Phase 2: Core Script Tests
+## Phase 2: Core Script Tests [checkpoint: f2436cc]
 
 - [x] Task: Write tests for `scripts/sync-commands.ts` (c30b2b0)
 - [x] Task: Write tests for `scripts/setup-bridge.ts` (e280475)
 - [x] Task: Write tests for `scripts/uninstall-bridge.ts` (b9bdb26)
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Core Script Tests' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Core Script Tests' (Protocol in workflow.md) (f2436cc)
 
 ## Phase 3: Verification Script Tests
 
