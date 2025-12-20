@@ -4,5 +4,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [ ] Track: Release/Tag Signing with Sigstore
+## [~] Track: Release/Tag Signing with Sigstore
 *Link: [./conductor/tracks/release_signing_sigstore_20251220/](./conductor/tracks/release_signing_sigstore_20251220/)*
