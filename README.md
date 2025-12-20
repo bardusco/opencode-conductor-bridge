@@ -6,11 +6,11 @@
 [![License](https://img.shields.io/github/license/bardusco/opencode-conductor-bridge?color=orange)](./LICENSE)
 [![Conductor Upstream](https://img.shields.io/badge/conductor-upstream-blueviolet)](https://github.com/gemini-cli-extensions/conductor)
 
-Bridge Gemini Conductor's Context-Driven Development (CDD) protocol to OpenCode.
+Bridge [Gemini Conductor](https://github.com/gemini-cli-extensions/conductor) (a Gemini CLI extension) Context-Driven Development (CDD) protocol to OpenCode.
 
 ## Overview
 
-This project allows you to use the [Gemini Conductor](https://github.com/gemini-cli-extensions/conductor) methodology directly in OpenCode. It maps Conductor's commands and templates to OpenCode custom commands while maintaining a reference to the upstream repository.
+This project allows you to use the Gemini Conductor methodology directly in OpenCode. It maps Conductor's commands and templates to OpenCode custom commands while maintaining a reference to the upstream repository.
 
 > **Dogfooding:** This bridge is developed using Conductor itself. See [`conductor/`](./conductor/) for our workflow, tracks, and development guidelines.
 
@@ -95,7 +95,7 @@ Once installed, you can use the following commands in OpenCode:
 
 The `/conductor.styleguide` command is an **additional feature** exclusive to this bridge. 
 
-In the original Conductor, styleguides exist only as reference files that the agent reads implicitly during code generation. The bridge **preserves this behavior** and **adds** an interactive command that allows you to:
+In the original Gemini Conductor, styleguides exist only as reference files that the agent reads implicitly during code generation. The bridge **preserves this behavior** and **adds** an interactive command that allows you to:
 
 - **Consult** any styleguide on demand: `/conductor.styleguide python`
 - **Apply** rules to a specific file or review code against the guidelines
@@ -135,7 +135,7 @@ The bridge operates in three layers:
 
 When you run `/conductor.bridge-update`:
 
-1. **Submodule Update** - Fetches latest Conductor from upstream
+1. **Submodule Update** - Fetches latest Gemini Conductor from upstream
 2. **Sync** - Regenerates bridge templates from TOML sources  
 3. **Setup** - Reinstalls commands to your project
 
@@ -234,11 +234,26 @@ See [`conductor/workflow.md`](./conductor/workflow.md) for our complete developm
 - If updating the Conductor submodule, update the Compatibility Matrix
 - Sync commands before committing: `npm run sync`
 
+## Support & Known Limitations
+
+### Getting Help
+
+- **Bug reports & feature requests:** [Open an issue](https://github.com/bardusco/opencode-conductor-bridge/issues)
+- **Questions about Gemini Conductor methodology:** See [upstream Gemini Conductor docs](https://github.com/gemini-cli-extensions/conductor)
+
+### Known Limitations
+
+| Limitation | Details |
+|------------|---------|
+| Command syntax differs from Gemini CLI | Gemini CLI uses `/conductor:setup`, OpenCode uses `/conductor.setup` (dot instead of colon) |
+| External directory permissions | OpenCode may prompt for permission to access `~/.opencode/conductor-bridge`. See [Permissions & Configuration](#permissions--configuration) |
+| No automatic upstream sync | Updates require manual `/conductor.bridge-update` or reinstallation |
+
 ## License
 
 This bridge is distributed under the same license as Gemini Conductor (Apache-2.0). See [LICENSE](./LICENSE) and [NOTICE](./NOTICE) for details.
 
-*Attribution: Based on the [Conductor](https://github.com/gemini-cli-extensions/conductor) project by Google.*
+*Attribution: Based on the [Gemini Conductor](https://github.com/gemini-cli-extensions/conductor) project (Gemini CLI extension by Google).*
 
 ---
 
