@@ -16,6 +16,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "audit": "npm audit --audit-level=critical --registry=https://registry.npmjs.org",
     "check": "npm run lint && npm run sync && npm run verify:compat && npm run verify:docs && npm run test:coverage"
   },
   "keywords": [],

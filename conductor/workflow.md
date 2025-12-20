@@ -173,6 +173,22 @@ Before marking any task complete, verify:
 # e.g., for a Go project: make check (if a Makefile exists)
 ```
 
+### Security Audit
+```bash
+# Run npm audit to check for vulnerabilities in dependencies
+npm run audit
+```
+
+**Vulnerability Policy:**
+- **Critical vulnerabilities:** Must be fixed before merging. CI will fail.
+- **High/Moderate/Low vulnerabilities:** Should be reviewed and addressed when possible, but won't block CI.
+
+**Interpreting Results:**
+- The audit shows a summary table with vulnerability counts by severity level
+- Each vulnerability includes a link to its security advisory
+- Suggested remediation commands are provided (e.g., `npm audit fix`)
+- If `npm audit fix` can't resolve the issue, check if a patched version exists or consider alternative packages
+
 ## Testing Requirements
 
 ### Unit Testing

@@ -42,6 +42,17 @@ jobs:
       - name: Install deps
         run: npm ci
 
+      # Security: Run npm audit to check for vulnerabilities
+      # Policy: Only fail on critical vulnerabilities to avoid blocking development
+      # for non-critical issues. All vulnerability levels are reported for awareness.
+      - name: Security Audit
+        run: |
+          echo "::group::Full Vulnerability Report (informational)"
+          npm audit --registry=https://registry.npmjs.org || true
+          echo "::endgroup::"
+          echo "Checking for critical vulnerabilities..."
+          npm audit --audit-level=critical --registry=https://registry.npmjs.org
+
       - name: Normalize line endings
         shell: bash
         run: |
@@ -55,6 +66,14 @@ jobs:
 
       - name: Run Tests with Coverage
         run: npm run test:coverage
+
+      - name: Upload coverage to Codecov
+        if: matrix.os == 'ubuntu-latest'
+        uses: codecov/codecov-action@v5
+        with:
+          files: ./coverage/coverage-final.json
+          fail_ci_if_error: false
+          verbose: true
 
       - name: Sync and Check Idempotency
         shell: bash
