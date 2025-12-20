@@ -11,6 +11,8 @@ Bridge Gemini Conductor's Context-Driven Development (CDD) protocol to OpenCode.
 
 This project allows you to use the [Gemini Conductor](https://github.com/gemini-cli-extensions/conductor) methodology directly in OpenCode. It maps Conductor's commands and templates to OpenCode custom commands while maintaining a reference to the upstream repository.
 
+> **Dogfooding:** This bridge is developed using Conductor itself. See [`conductor/`](./conductor/) for our workflow, tracks, and development guidelines.
+
 ## Installation
 
 ### Prerequisites
@@ -72,7 +74,74 @@ Once installed, you can use the following commands in OpenCode:
 - `/conductor.bridge-update`: Update the bridge and its commands to the latest version.
 - `/conductor.uninstall`: Remove bridge commands from the current project.
 
-## Threat Model & Security
+## How It Works
+
+The bridge operates in three layers:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        YOUR PROJECT                              │
+│  ┌─────────────────────┐    ┌─────────────────────────────────┐ │
+│  │ .opencode/command/  │    │ conductor/                      │ │
+│  │ conductor.*.md      │    │ ├── product.md      (yours)     │ │
+│  │ (installed copies)  │    │ ├── workflow.md     (yours)     │ │
+│  └─────────┬───────────┘    │ └── tracks/         (yours)     │ │
+│            │                └─────────────────────────────────┘ │
+└────────────┼────────────────────────────────────────────────────┘
+             │ setup-bridge.ts
+┌────────────┴────────────────────────────────────────────────────┐
+│              ~/.opencode/conductor-bridge/                       │
+│  ┌─────────────────────┐    ┌─────────────────────────────────┐ │
+│  │ templates/opencode/ │◄───│ vendor/conductor/               │ │
+│  │ command/*.md        │    │ (git submodule)                 │ │
+│  │ (generated)         │    │ - commands/conductor/*.toml     │ │
+│  └─────────────────────┘    │ - templates/code_styleguides/   │ │
+│            ▲          sync  └─────────────────────────────────┘ │
+│            │                             ▲                       │
+│       npm run sync              git submodule update --remote    │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Update Flow
+
+When you run `/conductor.bridge-update`:
+
+1. **Submodule Update** - Fetches latest Conductor from upstream
+2. **Sync** - Regenerates bridge templates from TOML sources  
+3. **Setup** - Reinstalls commands to your project
+
+**Your project's `conductor/` directory is never touched.**
+
+## Customization
+
+### Safe to Customize (Your Project)
+
+These files are created by `/conductor.setup` and belong to you:
+
+| Directory/File | Purpose | Updated by Bridge? |
+|----------------|---------|-------------------|
+| `conductor/product.md` | Product vision | Never |
+| `conductor/product-guidelines.md` | UX guidelines | Never |
+| `conductor/tech-stack.md` | Tech decisions | Never |
+| `conductor/workflow.md` | Development workflow | Never |
+| `conductor/tracks/` | Feature/bug tracks | Never |
+
+### Regenerated on Update (Do Not Edit)
+
+| Directory/File | Purpose | Why Not Edit? |
+|----------------|---------|---------------|
+| `.opencode/command/conductor.*.md` | Bridge commands | Overwritten by `/conductor.bridge-update` |
+
+### Forking the Bridge
+
+If you fork this repository for team customization:
+
+- `conductor/workflow.md` - Customize your team's development workflow
+- `conductor/code_styleguides/` - Add custom language styleguides
+
+> **Warning:** The `npm run maintenance` command includes `git reset --hard` which discards uncommitted changes. Always commit your customizations before running it.
+
+## Security
 
 We focus on transparency and predictability:
 
@@ -108,29 +177,32 @@ This gives full control over the source and avoids remote execution.
 | v1.1.12 | [b49d770](https://github.com/gemini-cli-extensions/conductor/commit/b49d770) | >= 1.0.0 | ✅ Stable |
 | v1.1.11 | [b49d770](https://github.com/gemini-cli-extensions/conductor/commit/b49d770) | >= 1.0.0 | ✅ Stable |
 | v1.1.10 | [b49d770](https://github.com/gemini-cli-extensions/conductor/commit/b49d770) | >= 1.0.0 | ✅ Stable |
-| v1.1.9 | [b49d770](https://github.com/gemini-cli-extensions/conductor/commit/b49d770) | >= 1.0.0 | ✅ Stable |
-| v1.1.8 | [b49d770](https://github.com/gemini-cli-extensions/conductor/commit/b49d770) | >= 1.0.0 | ✅ Stable |
-| v1.1.7 | [b49d770](https://github.com/gemini-cli-extensions/conductor/commit/b49d770) | >= 1.0.0 | ✅ Legacy |
-| v1.1.6 | [b49d770](https://github.com/gemini-cli-extensions/conductor/commit/b49d770) | >= 1.0.0 | ✅ Legacy |
-| v1.1.5 | [b49d770](https://github.com/gemini-cli-extensions/conductor/commit/b49d770) | >= 1.0.0 | ✅ Legacy |
-| v1.1.4 | [b49d770](https://github.com/gemini-cli-extensions/conductor/commit/b49d770) | >= 1.0.0 | ✅ Legacy |
-| v1.1.3 | [b49d770](https://github.com/gemini-cli-extensions/conductor/commit/b49d770) | >= 1.0.0 | ✅ Legacy |
-| v1.1.2 | [b49d770](https://github.com/gemini-cli-extensions/conductor/commit/b49d770) | >= 1.0.0 | ✅ Legacy |
-| v1.1.1 | [b49d770](https://github.com/gemini-cli-extensions/conductor/commit/b49d770) | >= 1.0.0 | ✅ Legacy |
-| v1.1.0 | [b49d770](https://github.com/gemini-cli-extensions/conductor/commit/b49d770) | >= 1.0.0 | ✅ Legacy |
+
+> For older versions, see [git tags](https://github.com/bardusco/opencode-conductor-bridge/tags).
 
 ## Contributing
 
-We welcome contributions! To set up your development environment:
+We welcome contributions! This project uses Conductor for its own development.
 
-1. Clone the repository with submodules: `git clone --recursive https://github.com/bardusco/opencode-conductor-bridge.git`
+### Setup
+
+1. Clone with submodules: `git clone --recursive https://github.com/bardusco/opencode-conductor-bridge.git`
 2. Install dependencies: `npm install`
-3. Run tests and linting: `npm test`
+3. Run checks: `npm run check`
+
+### Development Workflow
+
+See [`conductor/workflow.md`](./conductor/workflow.md) for our complete development process, including:
+
+- Task lifecycle and TDD workflow
+- Quality gates and commit guidelines
+- Release protocol
 
 ### Pull Request Process
-- Ensure `npm test` passes.
-- If you update the Conductor submodule, update the Compatibility Matrix in the README.
-- Sync commands before committing: `npm run sync`.
+
+- Ensure `npm run check` passes (lint, sync, verify, tests with 80%+ coverage)
+- If updating the Conductor submodule, update the Compatibility Matrix
+- Sync commands before committing: `npm run sync`
 
 ## License
 
