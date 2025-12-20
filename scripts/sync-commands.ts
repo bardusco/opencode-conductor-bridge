@@ -3,36 +3,42 @@ import * as path from 'path';
 import * as toml from 'toml';
 import { execSync } from 'child_process';
 
-const CONDUCTOR_SOURCE = path.join(process.cwd(), 'vendor/conductor');
-const COMMANDS_SOURCE = path.join(CONDUCTOR_SOURCE, 'commands/conductor');
-const TEMPLATES_SOURCE = path.join(CONDUCTOR_SOURCE, 'templates/code_styleguides');
-const OUTPUT_DIR = path.join(process.cwd(), 'templates/opencode/command');
+export interface SyncConfig {
+  conductorSource: string;
+  commandsSource: string;
+  templatesSource: string;
+  outputDir: string;
+  packageJsonPath: string;
+}
 
-function getSubmoduleSha() {
+export function createDefaultConfig(cwd: string = process.cwd()): SyncConfig {
+  const conductorSource = path.join(cwd, 'vendor/conductor');
+  return {
+    conductorSource,
+    commandsSource: path.join(conductorSource, 'commands/conductor'),
+    templatesSource: path.join(conductorSource, 'templates/code_styleguides'),
+    outputDir: path.join(cwd, 'templates/opencode/command'),
+    packageJsonPath: path.join(cwd, 'package.json'),
+  };
+}
+
+export function getSubmoduleSha(conductorSource: string): string {
   try {
-    return execSync('git rev-parse HEAD', { cwd: CONDUCTOR_SOURCE }).toString().trim();
+    return execSync('git rev-parse HEAD', { cwd: conductorSource }).toString().trim();
   } catch (e) {
     return 'main';
   }
 }
 
-function getPackageVersion(): string {
-  const pkgPath = path.join(process.cwd(), 'package.json');
-  try {
-    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
-    if (!pkg.version) {
-      throw new Error('package.json missing "version" field');
-    }
-    return pkg.version;
-  } catch (e) {
-    const error = e as Error;
-    console.error(`ERROR: Failed to read version from ${pkgPath}: ${error.message}`);
-    console.error('This usually means the script is running from the wrong directory.');
-    process.exit(1);
+export function getPackageVersion(packageJsonPath: string): string {
+  const pkg = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+  if (!pkg.version) {
+    throw new Error('package.json missing "version" field');
   }
+  return pkg.version;
 }
 
-function yamlEscape(str: string): string {
+export function yamlEscape(str: string): string {
   // In YAML double-quoted strings, backslash introduces escape sequences
   // Order matters: escape backslash first, then quotes, then newlines
   return str
@@ -41,33 +47,20 @@ function yamlEscape(str: string): string {
     .replace(/\n/g, ' ');
 }
 
-async function sync() {
-  if (!fs.existsSync(OUTPUT_DIR)) {
-    fs.mkdirSync(OUTPUT_DIR, { recursive: true });
-  }
-
-  const sha = getSubmoduleSha();
-  const version = getPackageVersion();
+export function generateCommandMarkdown(
+  commandName: string,
+  description: string,
+  prompt: string,
+  version: string,
+  sha: string,
+  file: string
+): string {
+  const conductorExtensionPath = '~/.gemini/extensions/conductor';
+  const placeholder = '{{CONDUCTOR_ROOT}}';
   
-  // Sync TOML Commands
-  const commandFiles = fs.readdirSync(COMMANDS_SOURCE).filter(f => f.endsWith('.toml'));
-  console.log(`Syncing commands from Conductor @ ${sha.substring(0, 7)}...`);
+  const processedPrompt = prompt.split(conductorExtensionPath).join(placeholder);
 
-  for (const file of commandFiles) {
-    const filePath = path.join(COMMANDS_SOURCE, file);
-    const content = fs.readFileSync(filePath, 'utf-8');
-    const parsed = toml.parse(content);
-
-    const commandName = path.basename(file, '.toml');
-    const description = parsed.description || '';
-    let prompt = parsed.prompt || '';
-
-    const conductorExtensionPath = '~/.gemini/extensions/conductor';
-    const placeholder = '{{CONDUCTOR_ROOT}}';
-    
-    prompt = prompt.split(conductorExtensionPath).join(placeholder);
-
-    const mdContent = `---
+  return `---
 description: "${yamlEscape(description)}"
 ---
 
@@ -79,27 +72,21 @@ description: "${yamlEscape(description)}"
 > **Conductor Source:** [${file}](https://github.com/gemini-cli-extensions/conductor/blob/${sha}/commands/conductor/${file})
 > **Local Reference:** \`{{CONDUCTOR_ROOT}}/commands/conductor/${file}\`
 
-${prompt}
+${processedPrompt}
 
 <!-- conductor-bridge-metadata:
   origin_file: ${file}
   origin_sha: ${sha}
 -->
 `;
+}
 
-    const outPath = path.join(OUTPUT_DIR, `conductor.${commandName}.md`);
-    fs.writeFileSync(outPath, mdContent);
-    console.log(`  ✓ Generated conductor.${commandName}.md`);
-  }
-
-  // Sync Styleguides (Aggregated into a single command)
-  if (fs.existsSync(TEMPLATES_SOURCE)) {
-    const styleguideFiles = fs.readdirSync(TEMPLATES_SOURCE).filter(f => f.endsWith('.md'));
-    const languages = styleguideFiles.map(f => path.basename(f, '.md')).sort();
-    
-    console.log(`Syncing styleguides (aggregated)...`);
-    
-    const mdContent = `---
+export function generateStyleguideMarkdown(
+  languages: string[],
+  version: string,
+  sha: string
+): string {
+  return `---
 description: "Access language-specific code styleguides bridged from Conductor"
 ---
 
@@ -129,11 +116,71 @@ ${languages.map(lang => `- ${lang}`).join('\n')}
   available_languages: ${languages.join(', ')}
 -->
 `;
-
-    const outPath = path.join(OUTPUT_DIR, `conductor.styleguide.md`);
-    fs.writeFileSync(outPath, mdContent);
-    console.log(`  ✓ Generated conductor.styleguide.md`);
-  }
 }
 
-sync().catch(console.error);
+export interface SyncResult {
+  commandsGenerated: string[];
+  styleguideGenerated: boolean;
+}
+
+export async function sync(config: SyncConfig): Promise<SyncResult> {
+  const result: SyncResult = {
+    commandsGenerated: [],
+    styleguideGenerated: false,
+  };
+
+  if (!fs.existsSync(config.outputDir)) {
+    fs.mkdirSync(config.outputDir, { recursive: true });
+  }
+
+  const sha = getSubmoduleSha(config.conductorSource);
+  const version = getPackageVersion(config.packageJsonPath);
+  
+  // Sync TOML Commands
+  const commandFiles = fs.readdirSync(config.commandsSource).filter(f => f.endsWith('.toml'));
+  console.log(`Syncing commands from Conductor @ ${sha.substring(0, 7)}...`);
+
+  for (const file of commandFiles) {
+    const filePath = path.join(config.commandsSource, file);
+    const content = fs.readFileSync(filePath, 'utf-8');
+    const parsed = toml.parse(content);
+
+    const commandName = path.basename(file, '.toml');
+    const description = parsed.description || '';
+    const prompt = parsed.prompt || '';
+
+    const mdContent = generateCommandMarkdown(commandName, description, prompt, version, sha, file);
+
+    const outPath = path.join(config.outputDir, `conductor.${commandName}.md`);
+    fs.writeFileSync(outPath, mdContent);
+    console.log(`  ✓ Generated conductor.${commandName}.md`);
+    result.commandsGenerated.push(`conductor.${commandName}.md`);
+  }
+
+  // Sync Styleguides (Aggregated into a single command)
+  if (fs.existsSync(config.templatesSource)) {
+    const styleguideFiles = fs.readdirSync(config.templatesSource).filter(f => f.endsWith('.md'));
+    const languages = styleguideFiles.map(f => path.basename(f, '.md')).sort();
+    
+    console.log(`Syncing styleguides (aggregated)...`);
+    
+    const mdContent = generateStyleguideMarkdown(languages, version, sha);
+
+    const outPath = path.join(config.outputDir, `conductor.styleguide.md`);
+    fs.writeFileSync(outPath, mdContent);
+    console.log(`  ✓ Generated conductor.styleguide.md`);
+    result.styleguideGenerated = true;
+  }
+
+  return result;
+}
+
+// Main execution - only runs when script is executed directly
+const isMainModule = import.meta.url === `file://${process.argv[1]}`;
+if (isMainModule) {
+  const config = createDefaultConfig();
+  sync(config).catch((error) => {
+    console.error(`ERROR: ${error.message}`);
+    process.exit(1);
+  });
+}
