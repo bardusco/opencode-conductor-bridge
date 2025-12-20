@@ -1,8 +1,7 @@
-# OpenCode Conductor Bridge (v1.2.0)
+# OpenCode Conductor Bridge
 
 [![CI](https://github.com/bardusco/opencode-conductor-bridge/actions/workflows/ci.yml/badge.svg)](https://github.com/bardusco/opencode-conductor-bridge/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/bardusco/opencode-conductor-bridge/graph/badge.svg)](https://codecov.io/gh/bardusco/opencode-conductor-bridge)
-[![npm audit](https://img.shields.io/badge/npm-audit%20passing-success?logo=npm)](https://docs.npmjs.com/cli/v10/commands/npm-audit)
 [![Version](https://img.shields.io/github/v/tag/bardusco/opencode-conductor-bridge?label=version&color=blue)](https://github.com/bardusco/opencode-conductor-bridge/releases)
 [![License](https://img.shields.io/github/license/bardusco/opencode-conductor-bridge?color=orange)](./LICENSE)
 [![Conductor Upstream](https://img.shields.io/badge/conductor-upstream-blueviolet)](https://github.com/gemini-cli-extensions/conductor)
@@ -240,3 +239,7 @@ See [`conductor/workflow.md`](./conductor/workflow.md) for our complete developm
 This bridge is distributed under the same license as Gemini Conductor (Apache-2.0). See [LICENSE](./LICENSE) and [NOTICE](./NOTICE) for details.
 
 *Attribution: Based on the [Conductor](https://github.com/gemini-cli-extensions/conductor) project by Google.*
+
+---
+
+*Not affiliated with Google, Gemini CLI, or OpenCode.*
