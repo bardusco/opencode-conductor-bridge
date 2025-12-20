@@ -53,6 +53,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Run Tests with Coverage
+        run: npm run test:coverage
+
       - name: Sync and Check Idempotency
         shell: bash
         run: |

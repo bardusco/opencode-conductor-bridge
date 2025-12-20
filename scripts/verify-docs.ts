@@ -6,20 +6,36 @@ import * as path from 'path';
  * Fails CI if there's drift between docs and actual version.
  */
 
-const ROOT = process.cwd();
-const pkgPath = path.join(ROOT, 'package.json');
-const readmePath = path.join(ROOT, 'README.md');
+export interface VerifyDocsConfig {
+  root: string;
+  packagePath: string;
+  readmePath: string;
+  templatesDir: string;
+}
 
-function getPackageVersion(): string {
-  const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+export function createDefaultConfig(root: string = process.cwd()): VerifyDocsConfig {
+  return {
+    root,
+    packagePath: path.join(root, 'package.json'),
+    readmePath: path.join(root, 'README.md'),
+    templatesDir: path.join(root, 'templates/opencode/command'),
+  };
+}
+
+export function getPackageVersion(packagePath: string): string {
+  const pkg = JSON.parse(fs.readFileSync(packagePath, 'utf-8'));
   if (!pkg.version) {
-    console.error('ERROR: package.json missing "version" field');
-    process.exit(1);
+    throw new Error('package.json missing "version" field');
   }
   return pkg.version;
 }
 
-function verifyReadme(version: string): boolean {
+export interface ReadmeVerifyResult {
+  valid: boolean;
+  errors: string[];
+}
+
+export function verifyReadme(readmePath: string, version: string): ReadmeVerifyResult {
   const readme = fs.readFileSync(readmePath, 'utf-8');
   const errors: string[] = [];
 
@@ -61,23 +77,32 @@ function verifyReadme(version: string): boolean {
   }
 
   if (errors.length > 0) {
-    console.error('❌ README version drift detected:');
+    console.error('README version drift detected:');
     errors.forEach(e => console.error(`   - ${e}`));
-    return false;
   }
 
-  return true;
+  return {
+    valid: errors.length === 0,
+    errors,
+  };
 }
 
-function verifyTemplates(version: string): boolean {
-  const templatesDir = path.join(ROOT, 'templates/opencode/command');
+export interface TemplatesVerifyResult {
+  valid: boolean;
+  errors: string[];
+}
+
+export function verifyTemplates(templatesDir: string, version: string): TemplatesVerifyResult {
+  const errors: string[] = [];
+
   if (!fs.existsSync(templatesDir)) {
-    console.error('ERROR: templates directory not found');
-    return false;
+    return {
+      valid: false,
+      errors: ['templates directory not found'],
+    };
   }
 
   const files = fs.readdirSync(templatesDir).filter(f => f.endsWith('.md'));
-  const errors: string[] = [];
 
   for (const file of files) {
     const content = fs.readFileSync(path.join(templatesDir, file), 'utf-8');
@@ -89,27 +114,56 @@ function verifyTemplates(version: string): boolean {
   }
 
   if (errors.length > 0) {
-    console.error('❌ Template version drift detected:');
+    console.error('Template version drift detected:');
     errors.forEach(e => console.error(`   - ${e}`));
-    return false;
   }
 
-  return true;
+  return {
+    valid: errors.length === 0,
+    errors,
+  };
 }
 
-// Main
-console.log('🔍 Verifying documentation version consistency...');
+export interface VerifyDocsResult {
+  success: boolean;
+  version: string;
+  readmeResult: ReadmeVerifyResult;
+  templatesResult: TemplatesVerifyResult;
+}
 
-const version = getPackageVersion();
-console.log(`   Package version: ${version}`);
+export async function verifyDocs(config: VerifyDocsConfig): Promise<VerifyDocsResult> {
+  console.log('Verifying documentation version consistency...');
 
-const readmeOk = verifyReadme(version);
-const templatesOk = verifyTemplates(version);
+  const version = getPackageVersion(config.packagePath);
+  console.log(`   Package version: ${version}`);
 
-if (readmeOk && templatesOk) {
-  console.log(`✅ All documentation matches v${version}`);
-  process.exit(0);
-} else {
-  console.error('\n💡 Run "npm run sync" and update README version references.');
-  process.exit(1);
+  const readmeResult = verifyReadme(config.readmePath, version);
+  const templatesResult = verifyTemplates(config.templatesDir, version);
+
+  const success = readmeResult.valid && templatesResult.valid;
+
+  if (success) {
+    console.log(`All documentation matches v${version}`);
+  } else {
+    console.error('\nRun "npm run sync" and update README version references.');
+  }
+
+  return {
+    success,
+    version,
+    readmeResult,
+    templatesResult,
+  };
+}
+
+// Main execution - only runs when script is executed directly
+const isMainModule = import.meta.url === `file://${process.argv[1]}`;
+if (isMainModule) {
+  const config = createDefaultConfig();
+  verifyDocs(config).then((result) => {
+    process.exit(result.success ? 0 : 1);
+  }).catch((error) => {
+    console.error(`ERROR: ${error.message}`);
+    process.exit(1);
+  });
 }

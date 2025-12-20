@@ -1,47 +1,105 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-const BRIDGE_ROOT = process.cwd();
-const VENDOR_CONDUCTOR = path.join(BRIDGE_ROOT, 'vendor/conductor');
+export interface SetupConfig {
+  bridgeRoot: string;
+  vendorConductor: string;
+  commandsDir: string;
+  targetProject: string;
+}
 
-async function setup() {
-  const targetProject = process.argv[2] || process.cwd();
-  const targetOpencodeDir = path.join(targetProject, '.opencode/command');
-  const legacyOpencodeDir = path.join(targetProject, '.opencode/commands');
+export function createDefaultConfig(
+  bridgeRoot: string = process.cwd(),
+  targetProject: string = process.argv[2] || process.cwd()
+): SetupConfig {
+  return {
+    bridgeRoot,
+    vendorConductor: path.join(bridgeRoot, 'vendor/conductor'),
+    commandsDir: path.join(bridgeRoot, 'templates/opencode/command'),
+    targetProject,
+  };
+}
+
+export interface SetupResult {
+  targetOpencodeDir: string;
+  filesInstalled: string[];
+  legacyDirMoved: boolean;
+  legacyDirWarning: boolean;
+}
+
+export function handleLegacyDirectory(
+  legacyDir: string,
+  targetDir: string
+): { moved: boolean; warning: boolean } {
+  if (!fs.existsSync(legacyDir)) {
+    return { moved: false, warning: false };
+  }
+
+  console.log(`Found legacy directory '${legacyDir}'.`);
+  
+  if (!fs.existsSync(targetDir)) {
+    console.log(`     - Moving it to '${targetDir}'...`);
+    fs.renameSync(legacyDir, targetDir);
+    return { moved: true, warning: false };
+  } else {
+    console.log(`     - You should remove it to avoid typos: rm -rf ${legacyDir}`);
+    return { moved: false, warning: true };
+  }
+}
+
+export function processTemplateContent(
+  content: string,
+  vendorConductor: string,
+  bridgeRoot: string
+): string {
+  return content
+    .split('{{CONDUCTOR_ROOT}}').join(vendorConductor)
+    .split('{{BRIDGE_ROOT}}').join(bridgeRoot);
+}
+
+export async function setup(config: SetupConfig): Promise<SetupResult> {
+  const targetOpencodeDir = path.join(config.targetProject, '.opencode/command');
+  const legacyOpencodeDir = path.join(config.targetProject, '.opencode/commands');
+
+  const result: SetupResult = {
+    targetOpencodeDir,
+    filesInstalled: [],
+    legacyDirMoved: false,
+    legacyDirWarning: false,
+  };
 
   // Handle legacy directory typo
-  if (fs.existsSync(legacyOpencodeDir)) {
-    console.log(`⚠️  Found legacy directory '${legacyOpencodeDir}'.`);
-    if (!fs.existsSync(targetOpencodeDir)) {
-      console.log(`     - Moving it to '${targetOpencodeDir}'...`);
-      fs.renameSync(legacyOpencodeDir, targetOpencodeDir);
-    } else {
-      console.log(`     - You should remove it to avoid typos: rm -rf ${legacyOpencodeDir}`);
-    }
-  }
+  const legacyResult = handleLegacyDirectory(legacyOpencodeDir, targetOpencodeDir);
+  result.legacyDirMoved = legacyResult.moved;
+  result.legacyDirWarning = legacyResult.warning;
 
   if (!fs.existsSync(targetOpencodeDir)) {
     fs.mkdirSync(targetOpencodeDir, { recursive: true });
   }
 
-  const commandsDir = path.join(BRIDGE_ROOT, 'templates/opencode/command');
-  const files = fs.readdirSync(commandsDir).filter(f => f.endsWith('.md'));
+  const files = fs.readdirSync(config.commandsDir).filter(f => f.endsWith('.md'));
 
   for (const file of files) {
-    const src = path.join(commandsDir, file);
+    const src = path.join(config.commandsDir, file);
     const dest = path.join(targetOpencodeDir, file);
     
-    // We'll create a symlink or just copy. Copying is safer for cross-platform.
-    // But we need to fix the paths in the copy to point back to the BRIDGE_ROOT.
     let content = fs.readFileSync(src, 'utf-8');
-    
-    // Replace the placeholder with the absolute path to THIS bridge's vendor
-    content = content.split('{{CONDUCTOR_ROOT}}').join(VENDOR_CONDUCTOR);
-    content = content.split('{{BRIDGE_ROOT}}').join(BRIDGE_ROOT);
+    content = processTemplateContent(content, config.vendorConductor, config.bridgeRoot);
     
     fs.writeFileSync(dest, content);
     console.log(`Installed ${file} to ${targetOpencodeDir}`);
+    result.filesInstalled.push(file);
   }
+
+  return result;
 }
 
-setup().catch(console.error);
+// Main execution - only runs when script is executed directly
+const isMainModule = import.meta.url === `file://${process.argv[1]}`;
+if (isMainModule) {
+  const config = createDefaultConfig();
+  setup(config).catch((error) => {
+    console.error(`ERROR: ${error.message}`);
+    process.exit(1);
+  });
+}
