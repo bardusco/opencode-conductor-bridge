@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: OpenCode Documentation
+    url: https://opencode.ai/docs
+    about: Questions about OpenCode itself
+  - name: Gemini Conductor (Upstream)
+    url: https://github.com/gemini-cli-extensions/conductor
+    about: Issues with the Conductor methodology or upstream commands
+  - name: Discussions
+    url: https://github.com/bardusco/opencode-conductor-bridge/discussions
+    about: General questions and community discussions
