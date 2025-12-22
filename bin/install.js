@@ -161,7 +161,9 @@ export async function install(config = {}) {
 }
 
 // Main execution - only runs when script is executed directly
-const isMainModule = import.meta.url === `file://${process.argv[1]}`;
+// Use realpathSync to resolve symlinks (e.g., /tmp -> /private/tmp on macOS)
+// because import.meta.url resolves symlinks but process.argv[1] doesn't
+const isMainModule = import.meta.url === `file://${fs.realpathSync(process.argv[1])}`;
 if (isMainModule) {
   install().then((result) => {
     if (!result.success) {
