@@ -25,7 +25,7 @@
   "description": "Bridge Gemini Conductor's Context-Driven Development protocol to OpenCode.",
   "devDependencies": {
     "@types/node": "^25.0.7",
-    "@vitest/coverage-v8": "^4.0.16",
+    "@vitest/coverage-v8": "^4.0.17",
     "toml": "^3.0.0",
     "ts-node": "^10.9.2",
     "tsx": "^4.21.0",
