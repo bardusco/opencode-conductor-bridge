@@ -24,7 +24,7 @@
   "license": "Apache-2.0",
   "description": "Bridge Gemini Conductor's Context-Driven Development protocol to OpenCode.",
   "devDependencies": {
-    "@types/node": "^25.5.2",
+    "@types/node": "^25.6.0",
     "@vitest/coverage-v8": "^4.1.4",
     "toml": "^3.0.0",
     "ts-node": "^10.9.2",
