@@ -1,3 +1,5 @@
+
+
 # OpenCode Conductor Bridge
 
 [![CI](https://github.com/bardusco/opencode-conductor-bridge/actions/workflows/ci.yml/badge.svg)](https://github.com/bardusco/opencode-conductor-bridge/actions/workflows/ci.yml)
@@ -25,6 +27,8 @@ Works on Windows, macOS, and Linux:
 ```bash
 npx github:bardusco/opencode-conductor-bridge
 ```
+
+Run this from the project directory you want to configure.
 
 ### Version Pinning
 Pin a specific version with `BRIDGE_REF`:
